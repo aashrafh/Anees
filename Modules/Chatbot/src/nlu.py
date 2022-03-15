@@ -1,5 +1,7 @@
 import lexical_analysis
 
 def understanding(text):
-    word = lexical_analysis.word_tokenization(text)[0]
-    print(word)
+    words = lexical_analysis.word_tokenization(text)[0:5]
+    print(words)
+    words = lexical_analysis.stemming(words)
+    print(words)
