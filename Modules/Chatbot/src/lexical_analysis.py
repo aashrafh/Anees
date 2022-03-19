@@ -1,6 +1,7 @@
 import nltk
 import spacy
 import arabicstopwords.arabicstopwords as stp
+import similar
 nlp = spacy.load('en_core_web_sm')
 
 def word_tokenization(data):
