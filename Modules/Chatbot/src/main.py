@@ -1,5 +1,6 @@
-import lexical_analysis
+#import lexical_analysis
 import tokenization
+import preprocess
 
 # while True:
 #     text = input()
@@ -16,14 +17,12 @@ import tokenization
 #     break
 
 
-text = " .   دفعت 10 جنية في مصر ؟ د.هحمد الساعة 10"
-#preprocessing kol el 7roof ely shbah b3d n5lehom 7aga w7da
-words = tokenization.get_tokens(text)
-#stopwords n5tar ely m7tageno
-print(lexical_analysis.remove_stopwards(words))  
-print(lexical_analysis.stemming(words))  
-#similarity show what task it is 
-#task
+text = " . أحمد  دفعت 10 جنية فى مصر ؟ د.هحمد الساعة 10"
+text = preprocess.remove_punctuations(text)
+text = preprocess.remove_diacritics(text)
+text = preprocess.normalize_arabic(text)
+tokens = tokenization.get_tokens(text)
+print(tokens)
     
     
     

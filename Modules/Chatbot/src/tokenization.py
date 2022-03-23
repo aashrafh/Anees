@@ -5,8 +5,7 @@ def get_tokens(text):
     for index , word in enumerate(words_after_split):
         if word in dictionary.keys():
             w = dictionary[word]
-            words_after_split.remove(word)
-            words_after_split.append(w)
+            words_after_split[index] = w
     return words_after_split
             
     
