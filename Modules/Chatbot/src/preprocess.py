@@ -1,7 +1,5 @@
-# coding=utf-8
 import re
 import string
-import tokenization
 
 arabic_punctuations = '''`÷×؛<>_()*&^%][ـ،/:"؟.,'{}~¦+|!”…“–ـ'''
 english_punctuations = string.punctuation
@@ -39,10 +37,16 @@ def remove_punctuations(text):
     translator = str.maketrans(punctuations_list, spaces)
     return text.translate(translator)
 
-def number_change(text):#to be determined to be used or not
+def number_change(text):
     hindi_nums = "٠١٢٣٤٥٦٧٨٩"
     arabic_nums = "0123456789"
     hindi_to_arabic_map = str.maketrans(hindi_nums, arabic_nums)
     text = text.translate(hindi_to_arabic_map)
     return text
 
+def pre_process(text):
+    text = remove_punctuations(text)
+    text = remove_diacritics(text)
+    text = normalize_arabic(text)
+    text = number_change(text)
+    return text
