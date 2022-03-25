@@ -66,4 +66,9 @@ class NER:
 
         csv_file = pd.DataFrame({col1:texts, col2:labels})   
         return  csv_file
-
+def get_ents(tokens):
+    new_ner = NER()
+    ents = dict()
+    for token in tokens:
+        ents[token] = new_ner.predict(token)
+    return ents
