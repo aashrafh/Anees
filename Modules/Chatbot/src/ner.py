@@ -70,5 +70,7 @@ def get_ents(tokens):
     new_ner = NER()
     ents = dict()
     for token in tokens:
-        ents[token] = new_ner.predict(token)
+        ent_type = new_ner.predict(token)
+        if ent_type != 'O':
+            ents[token] = ent_type
     return ents
