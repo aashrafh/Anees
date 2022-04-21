@@ -11,7 +11,6 @@ for verb in lst1:
     verbs.append(preprocess.pre_process(verb.text))
 for verb in lst2:
     verbs.append(preprocess.pre_process(verb.text))
-print(len(set(verbs)))
 file = open(r"../Data/verb_dictionary.txt","w+",encoding="utf-8")
 file.write(" ".join(list(set(verbs))))
 file.close()
