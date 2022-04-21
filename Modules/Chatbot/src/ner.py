@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.svm import LinearSVC
+from count_vectorizer import CountVectorizer
 
 class NER:
     def __init__(self):
