@@ -1,45 +1,44 @@
 import pandas as pd
 import numpy as np
-from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.svm import LinearSVC
-from count_vectorizer import CountVectorizer
+# from count_vectorizer import CountVectorizer
 
 class NER:
     def __init__(self):
-        path = "..\Data\ANERCorp_CamelLab_train.txt"
+        path = "../Data/ANERCorp_CamelLab_train.txt"
         self.train_dataframe = NER.textfile_to_dataframe(file=open(path, encoding='utf-8'))
+        print(1)
         self.train()
 
     def train(self):
         df = self.train_dataframe
-        # init variables
-        
-        # train, test = train_test_split(df, test_size = 0.2)
+
         train = df
         
         train_arr = []
-        # test_arr = []
         train_lbl = []
-        # test_lbl = []
-
+        print(2)
         train_arr=train['text'].astype(str)
         train_lbl=train['label'].astype(str)
-        # test_arr=test['text'].astype(str)
-        # test_lbl=test['label'].astype(str)
 
         vectorizer = CountVectorizer()
+        print(3)
         vectorizer.fit(train_arr)
+        print(4)
         train_mat = vectorizer.transform(train_arr)
+        print(5)
 
         tfidf = TfidfTransformer()
         tfidf.fit(train_mat)
         train_tfmat = tfidf.transform(train_mat)
 
-        # test_mat = vectorizer.transform(test_arr)
-        # test_tfmat = tfidf.transform(test_mat)
+        print(6)
 
         lsvm=LinearSVC()
         lsvm.fit(train_tfmat,train_lbl)
+
+        print(7)
 
         self.vectorizer = vectorizer
         self.predictor = lsvm
@@ -67,6 +66,7 @@ class NER:
 
         csv_file = pd.DataFrame({col1:texts, col2:labels})   
         return  csv_file
+
 def get_ents(tokens):
     new_ner = NER()
     ents = dict()
