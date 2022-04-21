@@ -1,17 +1,20 @@
 import tokenization
 import preprocess
-import ner
+#import ner
+import verb_extraction
 
-text = " . أحمد  دفعت 10 جنية فى مصر ؟ د.هحمد الساعة 10"
+text = input()
 #Preprocessing
 text = preprocess.pre_process(text)
 print(text)
 #Tokenization
 tokens = tokenization.get_tokens(text)
 print(tokens)
+tokens = verb_extraction.extract_stem_verb(tokens)
+print(tokens)
 # NER
-ents = ner.get_ents(tokens)
-print(ents)
+#ents = ner.get_ents(tokens)
+#print(ents)
 # GloVe ---> Task
 # Task
 
