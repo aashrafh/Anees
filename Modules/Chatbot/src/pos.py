@@ -3,11 +3,13 @@ def nouns_extract():
     nouns = file.read().split()
     file.close()
     return nouns
-def part_of_speech(tokens):
+def part_of_speech(tokens,ents):
     nouns = nouns_extract()
     result = list()
     for token in tokens:
-        if token in nouns:
+        if token in ents.keys():
+            result.append((token,ents[token]))
+        elif token in nouns:
             result.append((token,'n'))
         else:
             result.append((token,'v'))

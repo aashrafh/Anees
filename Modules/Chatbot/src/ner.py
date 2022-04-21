@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.svm import LinearSVC
 # from count_vectorizer import CountVectorizer
+import dill
 
 class NER:
     def __init__(self):
@@ -68,10 +69,18 @@ class NER:
         return  csv_file
 
 def get_ents(tokens):
-    new_ner = NER()
+    # new_ner = NER()
+    # ents = dict()
+    # for token in tokens:
+    #     ent_type = new_ner.predict(token)
+    #     if ent_type != 'O':
+    #         ents[token] = ent_type
+    # return ents
+    with open("../utils/ner_instance", 'rb') as in_strm:
+        ner_instance = dill.load(in_strm)
     ents = dict()
     for token in tokens:
-        ent_type = new_ner.predict(token)
+        ent_type = ner_instance.predict(token)
         if ent_type != 'O':
             ents[token] = ent_type
     return ents
