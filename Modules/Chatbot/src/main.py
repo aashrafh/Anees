@@ -10,8 +10,8 @@ print(text)
 tokens = tokenization.get_tokens(text)
 print(tokens)
 # NER
-ents = ner.get_ents(tokens)
-print(ents)
+# ents = ner.get_ents(tokens)
+# print(ents)
 # GloVe ---> Task
 # Task
 
