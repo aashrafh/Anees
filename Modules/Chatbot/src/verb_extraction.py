@@ -28,7 +28,7 @@ def extract_stem_verb(tokens,ents):
             for suffix in verb_suffix:
                 if len(token) - len(prefix) - len(suffix) > 2 and token[: len(prefix)] == prefix and token[len(token) - len(suffix) : ] == suffix:
                     token_possible_stem = token[len(prefix) : len(token) - len(suffix) ]
-                    if token_possible_stem in verbs and len(token_possible_stem) < len(token_stemmed):
+                    if token_possible_stem in verbs and len(token_possible_stem) <= len(token_stemmed):
                         token_stemmed = token_possible_stem
                         if prefix in ['فن','فت','في','ن','ت','ي']:
                             is_verb = "vPresent"
