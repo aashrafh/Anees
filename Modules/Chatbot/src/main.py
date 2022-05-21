@@ -4,6 +4,7 @@ import ner
 import verb_extraction
 import stemming
 import sentimental_analysis
+import intent_classifier
 
 
 text = input()
@@ -23,8 +24,8 @@ tokens_verb_noun = verb_extraction.extract_stem_verb(tokens,ents)
 print(tokens_verb_noun)
 tokens_verb_noun = stemming.stem(tokens_verb_noun)
 print(tokens_verb_noun)
-# GloVe ---> Task
 # Task
+intent = intent_classifier.intent(text)
 
     
     
