@@ -30,8 +30,11 @@ no_movies_voted_by_a_user = ratings.groupby('userId')['rating'].agg('count')
 # In[4]:
 
 
-user_votes_thr = 250
-movie_votes_thr = 1300
+# user_votes_thr = 350
+# movie_votes_thr = 1500
+
+user_votes_thr = 400
+movie_votes_thr = 1800
 
 
 # In[5]:
