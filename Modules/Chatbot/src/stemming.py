@@ -3,7 +3,7 @@ noun_suffix = {'كن','كما','كم','هم','هن','هما'}
 def stem(tokens_verb_noun):
     tokens_stemmed = list()
     for token in tokens_verb_noun:
-        if token[1] == 'v':
+        if token[1] != 'n':
             tokens_stemmed.append(token)
             continue
         noun = token[0]
