@@ -48,8 +48,11 @@ if __name__ == "__main__":
             pass
         else:
             text , tokens ,ents , tokens_verb_noun = NLU(text)
+            #use Question or Not intent
+            #extract Time
             match   intent:
                 case 'weather':
+                    #use Q or not intent if its not Q then call customized weather with generation api 
                     #call weather model
                     pass
                 case 'schedule':
@@ -62,7 +65,7 @@ if __name__ == "__main__":
                     #call sports generation model
                     pass
                 case default:
-                    #call generation api
+                    #call generation(Search) api
                     pass
         use_emotion = False
         spoken = 0
