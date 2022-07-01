@@ -65,3 +65,27 @@ def preprocess(text):
     text = " ".join(text.replace("\uFE0F", "").split())  # remove extra spaces
 
     return text
+
+
+def tokenize_arabic_data(tokenizer, prefix):
+    print(f"Loading the {prefix} utters...")
+
+    dials = []
+    with open(f"{DATA_PATH}/{prefix}_utters.json", 'r') as f:
+        dials = json.load(f)
+
+    print(f"Tokenize the {prefix} utters...")
+    ids = []
+    for dial in tqdm(dials):
+        dial_ids = []
+        for utter in dial:
+            proecessed_utter = preprocess(utter)
+            tokens = tokenizer.tokenize(proecessed_utter)
+            token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            dial_ids.append(token_ids)
+        ids.append(dial_ids)
+
+    assert len(ids) == len(dials)
+    with open(f"{DATA_PATH}/{prefix}_ids.json", 'w') as f:
+        json.dump(ids, f)
+    print(f"Saved the {prefix} ids.")
