@@ -2,3 +2,8 @@ __pycache__
 Modules/Chatbot/Data/
 Modules/Chatbot/utils/
 Modules/Chatbot/Docs/
+UI/Calendar/node_modules
+UI/Calendar/.*
+API_KEY*
+Modules/RecommendationSystem/Data
+.vscode
