@@ -1,5 +1,4 @@
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel, get_polynomial_decay_schedule_with_warmup
-from arabert.preprocess import ArabertPreprocessor
 from anees_dataset import *
 from preprocess import *
 from tqdm import tqdm
@@ -62,7 +61,6 @@ class AneesTrainer():
             print("Loading train & valid data...")
             train_set = AneesDataset(self.args.train_prefix, self.args)
             valid_set = AneesDataset(self.args.valid_prefix, self.args)
-            ppd = PadCollate(eos_id=self.args.eos_id)  # Pad the sequences
 
             self.train_loader = DataLoader(train_set,
                                            collate_fn=self.pad_collate,

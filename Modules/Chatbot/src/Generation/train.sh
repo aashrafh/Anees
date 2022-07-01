@@ -1,9 +1,9 @@
 python src/main.py \
     --mode="train" \
-    --data_dir="/content/drive/MyDrive/GP/gpt2/data" \
+    --data_dir="/content/drive/MyDrive/anees/data" \
     --train_prefix="train" \
     --valid_prefix="valid" \
-    --model_type="aubmindlab/aragpt2-base" \
+    --model_type='/content/drive/MyDrive/arzgpt2-corpus/run_clm_hageen' \
     --bos_token="<bos>" \
     --sp1_token="<sp1>" \
     --sp2_token="<sp2>" \
@@ -13,4 +13,4 @@ python src/main.py \
     --num_epochs=10 \
     --max_len=256 \
     --max_turns=5 \
-    --ckpt_dir="/content/drive/MyDrive/GP/gpt2/saved_models"
+    --ckpt_dir="/content/drive/MyDrive/anees/ckpts"
