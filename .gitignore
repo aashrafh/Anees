@@ -5,3 +5,6 @@ Modules/Chatbot/Docs/
 .vscode
 API_KEY*
 Modules/RecommendationSystem/Data
+Modules/Chatbot/src/Intent_Classification/Data/
+Modules/Chatbot/src/Intent_Classification/models/
+Modules/Chatbot/src/Sentimental_Analysis/new

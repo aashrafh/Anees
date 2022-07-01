@@ -6,7 +6,7 @@ def verb_dictionary():
     verbs = file.read().split()
     file.close()
     return verbs
-def extract_stem_verb(tokens,ents):
+def extract_stem_verb(tokens,ents={}):
     #no 2 verbs can appear after each other
     part_of_speech = pos.part_of_speech(tokens,ents)
     verbs = verb_dictionary()
