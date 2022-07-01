@@ -1,6 +1,6 @@
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel, get_polynomial_decay_schedule_with_warmup
 from arabert.preprocess import ArabertPreprocessor
-from custom_dataset import *
+from anees_dataset import *
 from preprocess import *
 from tqdm import tqdm
 from torch.utils.data import DataLoader
@@ -62,16 +62,16 @@ class AneesTrainer():
             print("Loading train & valid data...")
             train_set = AneesDataset(self.args.train_prefix, self.args)
             valid_set = AneesDataset(self.args.valid_prefix, self.args)
-            ppd = PadCollate(eos_id=self.args.eos_id)
+            ppd = PadCollate(eos_id=self.args.eos_id)  # Pad the sequences
 
             self.train_loader = DataLoader(train_set,
-                                           collate_fn=ppd.pad_collate,
+                                           collate_fn=self.pad_collate,
                                            shuffle=True,
                                            batch_size=self.args.batch_size,
                                            num_workers=0,
                                            pin_memory=True)
             self.valid_loader = DataLoader(valid_set,
-                                           collate_fn=ppd.pad_collate,
+                                           collate_fn=self.pad_collate,
                                            batch_size=self.args.batch_size,
                                            num_workers=0,
                                            pin_memory=True)
@@ -115,6 +115,22 @@ class AneesTrainer():
                     print("Training will start from the begining.")
                 else:
                     exit()
+
+    def pad_collate(self, batch):
+        input_ids, token_type_ids, labels = [], [], []
+        for idx, seqs in enumerate(batch):
+            input_ids.append(torch.LongTensor(seqs[0]))
+            token_type_ids.append(torch.LongTensor(seqs[1]))
+            labels.append(torch.LongTensor(seqs[2]))
+
+        input_ids = torch.nn.utils.rnn.pad_sequence(
+            input_ids, batch_first=True, padding_value=self.args.eos_id)
+        token_type_ids = torch.nn.utils.rnn.pad_sequence(
+            token_type_ids, batch_first=True, padding_value=self.args.eos_id)
+        labels = torch.nn.utils.rnn.pad_sequence(
+            labels, batch_first=True, padding_value=-100)
+
+        return input_ids, token_type_ids, labels
 
     def train(self):
         self.set_seed(SEED)  # Set the seed for reproducibility
