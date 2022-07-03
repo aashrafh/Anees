@@ -1,6 +1,6 @@
 import re
 import string
-
+# transform "ث" to "ت"
 arabic_punctuations = '''`÷×؛<>_()*&^%][ـ،/:"؟.,'{}~¦+|!”…“–ـ'''
 english_punctuations = string.punctuation
 punctuations_list = arabic_punctuations + english_punctuations
@@ -18,11 +18,12 @@ arabic_diacritics = re.compile("""
                          """, re.VERBOSE)
 spaces = ' '*len(punctuations_list)
 
+# need to be added to the stemming
 def normalize_arabic(text):
     text = re.sub("[إأآا]", "ا", text)
     text = re.sub("ى", "ي", text)
     text = re.sub("ؤ", "ء", text)
-    text = re.sub("ئ", "ء", text)
+    text = re.sub("ئ", "ي", text)
     text = re.sub("ة", "ه", text)
     text = re.sub("گ", "ك", text)
     return text

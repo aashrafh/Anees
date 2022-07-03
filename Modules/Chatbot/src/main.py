@@ -6,6 +6,8 @@ import verb_extraction
 import stemming
 import sentimental_analysis
 import intent_classifier
+import time_extract
+import content_extract
 
 def NLU(text):
     #Preprocessing
@@ -56,7 +58,9 @@ if __name__ == "__main__":
                     #call weather model
                     pass
                 case 'schedule':
-                    #call schedule model
+                    edited_time, tokens_used, filtered_tokens = time_extract(tokens, tokens_verb_noun)
+                    content = content_extract(text, tokens_used, filtered_tokens)
+                    print (edited_time, content)
                     pass
                 case 'recommendation':
                     #call recommendation model

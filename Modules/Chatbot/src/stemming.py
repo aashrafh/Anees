@@ -1,4 +1,4 @@
-noun_prefix = {'ال','ب','ك','بال','كال','لل'}
+noun_prefix = {'ال','ب','ك','بال','كال','لل','و'}
 noun_suffix = {'كن','كما','كم','هم','هن','هما'}
 def stem(tokens_verb_noun):
     tokens_stemmed = list()
