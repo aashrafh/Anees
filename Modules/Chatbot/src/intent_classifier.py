@@ -21,4 +21,4 @@ def intent(text):
         label = labels[np.argmax(pred)-1] 
     except:
         label = 'general'
-    print(label)
+    return label

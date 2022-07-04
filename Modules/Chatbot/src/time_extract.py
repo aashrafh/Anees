@@ -59,7 +59,8 @@ def numbers_bag_of_words():
                 numbersBagOfWords.append(number + "و" + higher)
     return numbersBagOfWords
 #------------------------------------------------------------------------
-def get_time(tokens):
+def get_time(tokens, task):
+    # اسبوع ناقصة
     numbersBagOfWords = numbers_bag_of_words()
     bigram = bigrams(tokens)
     bigram.reverse()
@@ -97,7 +98,7 @@ def get_time(tokens):
                 tokens_used[tokens.index(gram[1])] = 1
 
     # no specifiers
-    if edits[1] == 0:            
+    if edits[1] == 0 and task == 'schedule':            
         minDistance = 1000
         token_index = -1
         for index, token in enumerate(tokens):
@@ -119,7 +120,8 @@ def get_time(tokens):
         if token in time_specifiers_tokens:
             tokens_used[tokens.index(token)] = 1
             edits[7] = time_specifiers_tokens.get(token)[0]   
-
+    if edits[1] > 23 and edits[4] == 1:
+        edits[1] = 23
     return edits, tokens_used
 # need to add "الصبح" "بليل" 
 # need to add "الا ربع" "الا تلت" 
@@ -131,13 +133,14 @@ def edit_time (edits):
     new_time = datetime(year= now_time.year
                         , month= ( edits[3] * edits[6] ) + ( now_time.month * (not edits[6]) )
                         , day=   ( edits[2] * edits[5] ) + ( now_time.day * (not edits[5]) )
-                        , hour=  ( edits[1] * edits[4] + 12 * edits[7]) + ( now_time.hour * (not edits[4]) )
+                        , hour=  ( edits[1]+ 12 * edits[7]) * edits[4]  + ( now_time.hour * (not edits[4]) )
                         , minute=( edits[0] * edits[4] ) + ( now_time.minute * (not edits[4]) ))
     # add the incremental values
     new_time = new_time + relativedelta(minutes= edits[0] * (not edits[4]), hours=edits[1] * (not edits[4]), days=edits[2] * (not edits[5]), months=edits[3] * (not edits[6]))
+    return new_time
 
 #------------------------------------------------------------------------
-def main(tokens, tokens_verb_noun):
+def main(tokens, tokens_verb_noun , task = 'schedule'):
     filtered_tokens = []
     for index, token in enumerate(tokens):
         if tokens_verb_noun[index][1] != "vOrder":
@@ -147,7 +150,7 @@ def main(tokens, tokens_verb_noun):
             filtered_tokens[index] = token[2:]
         elif token[0] == 'و' :
             filtered_tokens[index] = token[1:]
-    edit, tokens_used = get_time(filtered_tokens)
+    edit, tokens_used = get_time(filtered_tokens, task)
     edited_time = edit_time(edit)
     return edited_time, tokens_used, filtered_tokens
 

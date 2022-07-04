@@ -8,6 +8,7 @@ import sentimental_analysis
 import intent_classifier
 import time_extract
 import content_extract
+import weather
 
 def NLU(text):
     #Preprocessing
@@ -19,7 +20,7 @@ def NLU(text):
     #Part of Speech and Stemming
     tokens_verb_noun = verb_extraction.extract_stem_verb(tokens,ents)
     tokens_verb_noun = stemming.stem(tokens_verb_noun)
-    return text , emotion , tokens ,ents , tokens_verb_noun
+    return text , tokens ,ents , tokens_verb_noun
 
 
 if __name__ == "__main__":
@@ -30,8 +31,10 @@ if __name__ == "__main__":
     while(True):
         text = input()
         spoken += 1
+        text , tokens ,ents , tokens_verb_noun = NLU(text)
+        preprocessed_text = " ".join(tokens) 
         #Sentimental Analysis
-        emotion = sentimental_analysis.get_emotion(text)
+        emotion = sentimental_analysis.get_emotion(preprocessed_text)
         emotion_list.append(emotion)
         if spoken == 3:
             #use the majority emotion in list to answer using it
@@ -44,24 +47,21 @@ if __name__ == "__main__":
         # if category == same category:
         #   use recommendation system of maps
         # Task
-        intent = intent_classifier.intent(text)
+        intent = intent_classifier.intent(preprocessed_text)
         if intent == 'general' or intent == 'greeting' or intent == 'thank':
             #call generation api
             pass
         else:
-            text , tokens ,ents , tokens_verb_noun = NLU(text)
             #use Question or Not intent
             #extract Time
             match   intent:
                 case 'weather':
-                    #use Q or not intent if its not Q then call customized weather with generation api 
-                    #call weather model
-                    pass
-                case 'schedule':
-                    edited_time, tokens_used, filtered_tokens = time_extract(tokens, tokens_verb_noun)
-                    content = content_extract(text, tokens_used, filtered_tokens)
+                    #use Q or not intent if its not Q then call generation api 
+                    print(weather.main(tokens,tokens_verb_noun,ents))
+                case "schedule":
+                    edited_time, tokens_used, filtered_tokens = time_extract.main(tokens, tokens_verb_noun)
+                    content = content_extract.main(text, tokens_used, filtered_tokens)
                     print (edited_time, content)
-                    pass
                 case 'recommendation':
                     #call recommendation model
                     pass

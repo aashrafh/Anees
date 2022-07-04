@@ -1,3 +1,4 @@
+from time_extract import edit_distance
 def get_closest_word (word, tokens):
     min_dist = 10000
     min_index = 0
