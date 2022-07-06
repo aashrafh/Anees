@@ -35,6 +35,7 @@ if __name__ == "__main__":
         preprocessed_text = " ".join(tokens) 
         #Sentimental Analysis
         emotion = sentimental_analysis.get_emotion(preprocessed_text)
+        continue
         emotion_list.append(emotion)
         if spoken == 3:
             #use the majority emotion in list to answer using it
