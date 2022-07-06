@@ -3,7 +3,7 @@ def get_closest_word (word, tokens):
     min_dist = 10000
     min_index = 0
     for index, wordInText in enumerate(tokens):
-        distance = edit_distance(word,wordInText, len(word), len(wordInText))
+        distance = edit_distance(word,wordInText)
         if distance < min_dist:
             min_dist = distance
             min_index = index
@@ -26,7 +26,6 @@ def main(text, tokens_used, filtered_tokens):
                 longest_subsequence_start = start_index
             
     filtered_tokens[longest_subsequence_start]
-    print (filtered_tokens[longest_subsequence_start], filtered_tokens[ longest_subsequence_start + longest_subsequence - 1])
 
     text_splitted = text.split()
     content = text_splitted[ get_closest_word (filtered_tokens[longest_subsequence_start], text_splitted):
