@@ -35,7 +35,6 @@ if __name__ == "__main__":
         preprocessed_text = " ".join(tokens) 
         #Sentimental Analysis
         emotion = sentimental_analysis.get_emotion(preprocessed_text)
-        continue
         emotion_list.append(emotion)
         if spoken == 3:
             #use the majority emotion in list to answer using it
@@ -61,11 +60,15 @@ if __name__ == "__main__":
                     print(weather.main(tokens,tokens_verb_noun,ents))
                 case "schedule":
                     edited_time, tokens_used, filtered_tokens = time_extract.main(tokens, tokens_verb_noun)
-                    content = content_extract.main(text, tokens_used, filtered_tokens)
+                    content = content_extract.get_schedule_content(text, tokens_used, filtered_tokens)
                     print (edited_time, content)
                 case 'recommendation':
-                    #call recommendation model
-                    pass
+                    if intent == 'movies':
+                        movie, categories = content_extract.get_movies_content(text, tokens, tokens_verb_noun)
+                        print (movie, categories)
+                    else :
+                        place, categories = content_extract.get_places_content(text, tokens, tokens_verb_noun)
+                        print (place, categories)
                 case 'sports':
                     #call sports generation model
                     pass
@@ -76,10 +79,3 @@ if __name__ == "__main__":
         spoken = 0
         emotion_to_be_used = 'neutral'
         emotion_list = list()
-    
-
-    
-    
-    
-
-

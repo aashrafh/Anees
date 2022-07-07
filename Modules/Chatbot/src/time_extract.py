@@ -51,7 +51,7 @@ def get_closest_day(word):
 def get_closest_hour(dummy):
     return 0
 #------------------------------------------------------------------------
-def get_closest_word_with_threshold (word, bag_of_words):
+def get_closest_word_with_threshold (word, bag_of_words, threshold = 0.35):
     editDistance = 1
     closest_word_index = 0
     closest_word = bag_of_words[0]
@@ -62,7 +62,7 @@ def get_closest_word_with_threshold (word, bag_of_words):
             editDistance = editDistanceRatio
             closest_word = token
             closest_word_index = index
-    if editDistance > 0.35:
+    if editDistance > threshold:
         return -1, 1000 # not included in the bag of word
     return closest_word_index, editDistance
 #------------------------------------------------------------------------    
