@@ -9,6 +9,7 @@ import intent_classifier
 import time_extract
 import content_extract
 import weather
+import recomm_intent
 
 def NLU(text):
     #Preprocessing
@@ -48,6 +49,7 @@ if __name__ == "__main__":
         #   use recommendation system of maps
         # Task
         intent = intent_classifier.intent(preprocessed_text)
+        print(intent)
         if intent == 'general' or intent == 'greeting' or intent == 'thank':
             #call generation api
             pass
@@ -63,7 +65,9 @@ if __name__ == "__main__":
                     content = content_extract.get_schedule_content(text, tokens_used, filtered_tokens)
                     print (edited_time, content)
                 case 'recommendation':
-                    if intent == 'movies':
+                    r_intent = recomm_intent.intent(preprocessed_text)
+                    print(r_intent)
+                    if r_intent == 'movies':
                         movie, categories = content_extract.get_movies_content(text, tokens, tokens_verb_noun)
                         print (movie, categories)
                     else :

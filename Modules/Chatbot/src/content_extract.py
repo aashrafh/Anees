@@ -49,7 +49,7 @@ def get_movies_content (text, tokens, tokens_verb_noun):
         movie = ""
     for index, word in enumerate(tokens):
         if tokens_verb_noun[index][1] == 'n':
-            index, distance = time_extract.get_closest_word_with_threshold(word,movies_bag_of_words_ar, 0.4)
+            index, distance = get_closest_word_with_threshold(word,movies_bag_of_words_ar, 0.4)
             if index != -1:
                 categories.append([movies_bag_of_words_eng[index], 1 - distance])
     return movie, categories

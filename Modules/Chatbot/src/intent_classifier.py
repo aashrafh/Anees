@@ -6,7 +6,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 import pickle
 
-labels = ['sports','schedule','general','weather','recommendation','greeting','thank']
+labels = ['schedule','weather','general','recommendation','sports','greeting','thank']
 
 max_length = 200
 training_portion = 0.8
