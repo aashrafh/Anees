@@ -1,3 +1,5 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 from collections import Counter
 import tokenization
 import preprocess
@@ -10,21 +12,78 @@ import time_extract
 import content_extract
 import weather
 import recomm_intent
+import dill
+import pos
+import pickle
+from tensorflow import keras
 
-def NLU(text):
+def stopwords_extraction():
+    file = open("../Data/stopwords.txt","r",encoding="utf-8")
+    stopwords = file.read().split()
+    file.close()
+    return stopwords
+def get_ner_instance():
+    with open("../utils/ner_instance", 'rb') as in_strm:
+        ner_instance = dill.load(in_strm)
+    return ner_instance
+
+def verb_dictionary():
+    file = open("../Data/verb_dictionary.txt","r",encoding="utf-8")
+    verbs = file.read().split()
+    file.close()
+    return verbs
+
+def nouns_extract():
+    file = open("../Data/noun_dictionary.txt","r",encoding="utf-8")
+    nouns = file.read().split()
+    file.close()
+    return nouns
+
+def get_emotion_models():
+    filename = f'Sentimental_Analysis/models/sentmental_all_model.sav'
+    model = pickle.load(open(filename, 'rb'))
+    filename = f'Sentimental_Analysis/models/tfidf_all_model.sav'
+    tf_idf = pickle.load(open(filename, 'rb'))
+    return model, tf_idf
+
+def get_intent_models():
+    m = keras.models.load_model("Intent_Classification/models")
+    filename = f'../utils/tokenizer.sav'
+    tokenizer = pickle.load(open(filename, 'rb'))
+    return m,tokenizer
+
+def get_recomm_intent_models():
+    m = keras.models.load_model("Recommendation_intent/intent/movie_location_model")
+    filename = f'../utils/recomm_tokenizer.sav'
+    tokenizer = pickle.load(open(filename, 'rb'))
+    return m,tokenizer
+
+def NLU(text,stopwords,ner_instance,verbs,nouns):
     #Preprocessing
     text = preprocess.pre_process(text)
     #Tokenization
-    tokens = tokenization.get_tokens(text)
+    tokens = tokenization.get_tokens(text,stopwords)
     # NER
-    ents = ner.get_ents(tokens)
+    ents = ner.get_ents(tokens,ner_instance)
     #Part of Speech and Stemming
-    tokens_verb_noun = verb_extraction.extract_stem_verb(tokens,ents)
+    part_of_speech = pos.part_of_speech(tokens,nouns,ents)
+    tokens_verb_noun = verb_extraction.extract_stem_verb(tokens,verbs,part_of_speech,ents)
     tokens_verb_noun = stemming.stem(tokens_verb_noun)
     return text , tokens ,ents , tokens_verb_noun
 
 
 if __name__ == "__main__":
+    
+    #loading files and models needed
+    stopwords = stopwords_extraction()
+    ner_instance = get_ner_instance()
+    verbs = verb_dictionary()
+    nouns = nouns_extract()
+    emotions_model , emotions_tf_idf = get_emotion_models()
+    intent_model,tokenizer = get_intent_models()
+    recomm_intent_model,recomm_tokenizer = get_recomm_intent_models()
+    
+    #Start of chat
     spoken = 0
     emotion_list = list()
     use_emotion = False
@@ -32,30 +91,31 @@ if __name__ == "__main__":
     while(True):
         text = input()
         spoken += 1
-        text , tokens ,ents , tokens_verb_noun = NLU(text)
+        text , tokens ,ents , tokens_verb_noun = NLU(text,stopwords,ner_instance,verbs,nouns)
         preprocessed_text = " ".join(tokens) 
         #Sentimental Analysis
-        emotion = sentimental_analysis.get_emotion(preprocessed_text)
+        emotion = sentimental_analysis.get_emotion(preprocessed_text,emotions_model , emotions_tf_idf)
         emotion_list.append(emotion)
         if spoken == 3:
+            #ToDO need to add emotion to text to be used in generation
             #use the majority emotion in list to answer using it
             c = Counter(emotion_list)
             use_emotion = True
             emotion_to_be_used = c.most_common(1)
             if dict(c)[emotion_to_be_used] == 1:
                 emotion_to_be_used = 'neutral'
+                
         #check if category location(parmacy,libirary) of user is repeated for a number of time then use the recommendation
         # if category == same category:
         #   use recommendation system of maps
-        # Task
-        intent = intent_classifier.intent(preprocessed_text)
+        
+        # Tasks
+        intent = intent_classifier.intent(preprocessed_text,intent_model,tokenizer)
         print(intent)
         if intent == 'general' or intent == 'greeting' or intent == 'thank':
             #call generation api
             pass
         else:
-            #use Question or Not intent
-            #extract Time
             match   intent:
                 case 'weather':
                     #use Q or not intent if its not Q then call generation api 
@@ -65,7 +125,7 @@ if __name__ == "__main__":
                     content = content_extract.get_schedule_content(text, tokens_used, filtered_tokens)
                     print (edited_time, content)
                 case 'recommendation':
-                    r_intent = recomm_intent.intent(preprocessed_text)
+                    r_intent = recomm_intent.intent(preprocessed_text,recomm_intent_model,recomm_tokenizer)
                     print(r_intent)
                     if r_intent == 'movies':
                         movie, categories = content_extract.get_movies_content(text, tokens, tokens_verb_noun)
@@ -73,9 +133,6 @@ if __name__ == "__main__":
                     else :
                         place, categories = content_extract.get_places_content(text, tokens, tokens_verb_noun)
                         print (place, categories)
-                case 'sports':
-                    #call sports generation model
-                    pass
                 case default:
                     #call generation(Search) api
                     pass
