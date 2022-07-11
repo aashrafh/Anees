@@ -1,15 +1,8 @@
-import pos
 verb_prefix = {'فسن','فست','فسي','فا','سي','ست','سن','سا','فن','فت','في','فس','س','ف','ن','ت','ي','ا',''}
 verb_suffix = {'لي','ي','تما','ا','ت','ين','ان','و','وا','تن','تم','تا','نا','ون','ن',''}
-def verb_dictionary():
-    file = open("../Data/verb_dictionary.txt","r",encoding="utf-8")
-    verbs = file.read().split()
-    file.close()
-    return verbs
-def extract_stem_verb(tokens,ents={}):
+
+def extract_stem_verb(tokens,verbs,part_of_speech,ents={}):
     #no 2 verbs can appear after each other
-    part_of_speech = pos.part_of_speech(tokens,ents)
-    verbs = verb_dictionary()
     tokens_stemmed = list()
     for index , token in enumerate(tokens):
         if part_of_speech[index][1] != 'v':
