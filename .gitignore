@@ -1,6 +1,5 @@
 __pycache__
 Modules/Chatbot/Data/
-Modules/Chatbot/utils/
 Modules/Chatbot/Docs/
 Modules/RecommendationSystem/Data/
 Modules/RecommendationSystem/utils/movie_recommender
@@ -12,7 +11,6 @@ Modules/RecommendationSystem/Data
 API_KEY*
 Modules/RecommendationSystem/Data
 Modules/Chatbot/src/Intent_Classification/Data/
-Modules/Chatbot/src/Intent_Classification/models/
 Modules/Chatbot/src/Sentimental_Analysis/Data
 Modules/Chatbot/src/Sentimental_Analysis/data_preprocessing
 Modules/Chatbot/src/Sentimental_Analysis/pos_neg/new
