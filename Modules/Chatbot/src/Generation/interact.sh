@@ -1,0 +1,13 @@
+python src/main.py \
+    --mode="infer" \
+    --data_dir="/content/drive/MyDrive/GP/gpt2/data" \
+    --model_type="aubmindlab/aragpt2-base" \
+    --bos_token="<bos>" \
+    --sp1_token="<sp1>" \
+    --sp2_token="<sp2>" \
+    --max_len=256 \
+    --max_turns=5 \
+    --top_p=0.8 \
+    --ckpt_dir="/content/drive/MyDrive/GP/gpt2/saved_models" \
+    --ckpt_name="best_ckpt_epoch=1_valid_loss=1.0759" \
+    --end_command="EOC!"

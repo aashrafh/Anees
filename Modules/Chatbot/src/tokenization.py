@@ -1,10 +1,4 @@
-def stopwords_extraction():
-    file = open("../Data/stopwords.txt","r",encoding="utf-8")
-    stopwords = file.read().split()
-    file.close()
-    return stopwords
-def get_tokens(text):
-    stopwords = stopwords_extraction()
+def get_tokens(text,stopwords):
     dictionary = {'د':"دكتور"}#to be continued
     words_after_split = text.split()
     for index , word in enumerate(words_after_split):

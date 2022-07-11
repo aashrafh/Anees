@@ -9,3 +9,12 @@ UI/Calendar/.*
 API_KEY*
 Modules/RecommendationSystem/Data
 .vscode
+API_KEY*
+Modules/RecommendationSystem/Data
+Modules/Chatbot/src/Intent_Classification/Data/
+Modules/Chatbot/src/Intent_Classification/models/
+Modules/Chatbot/src/Sentimental_Analysis/Data
+Modules/Chatbot/src/Sentimental_Analysis/data_preprocessing
+Modules/Chatbot/src/Sentimental_Analysis/pos_neg/new
+Modules/Chatbot/src/Recommendation_intent/intent/Data/
+Modules/Chatbot/src/Recommendation_intent/draft

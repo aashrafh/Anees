@@ -1,0 +1,16 @@
+python src/main.py \
+    --mode="train" \
+    --data_dir="/content/drive/MyDrive/anees/data" \
+    --train_prefix="train" \
+    --valid_prefix="valid" \
+    --model_type='/content/drive/MyDrive/arzgpt2-corpus/run_clm_hageen' \
+    --bos_token="<bos>" \
+    --sp1_token="<sp1>" \
+    --sp2_token="<sp2>" \
+    --lr=2e-5 \
+    --warmup_ratio=0.0 \
+    --batch_size=8 \
+    --num_epochs=10 \
+    --max_len=256 \
+    --max_turns=5 \
+    --ckpt_dir="/content/drive/MyDrive/anees/ckpts"
