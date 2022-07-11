@@ -1,7 +1,6 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -71,7 +70,22 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    console.log(messages, messages.at(-1));
+    if (messages[0]?.user?._id === 1) {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: "Recieved!",
+            createdAt: new Date(),
+            user: {
+              _id: 2,
+              name: "React Native",
+              avatar: "https://placeimg.com/140/140/any",
+            },
+          },
+        ])
+      );
+    }
   }, [messages]);
 
   return (
