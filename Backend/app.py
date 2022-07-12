@@ -4,7 +4,7 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 import sys
 import os
-module_path = os.path.abspath(os.path.join('E:\GP\Anees\Anees\Modules\Chatbot\src'))
+module_path = os.path.abspath(os.path.join('F:\coullage\Year 4\Anees\Modules\Chatbot\src'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 import main
