@@ -33,6 +33,7 @@ def get_response():
         movies = response["movies"]
         for movie in list(movies["title"]):
             add_movie(user, movie)
+        response = {'movie': list(movies["title"])}
     elif intent == 'recommendation-places':
         locations = response["places"]
         for loc in locations:
@@ -108,27 +109,19 @@ def get_most_frequent_emotion():
 @app.route('/update_place_rating', methods=['PUT'])
 def update_place_rating():
     username = request.json['username']
-    longitude = request.json['longitude']
-    latitude = request.json['latitude']
+    place_name = request.json['place_name']
     rating = request.json['rating']
     rating = max(min(rating, 5), 0)
     user = usersCollection.find_one({'username': username})
     if user == None:
         return "there is no user with this username"
-    range_of_longitude_search = 1
     places = user['places']
-    flag = 0
     for place in places:
-        if (place['longitude'] >= longitude - range_of_longitude_search and place['longitude'] <= longitude + range_of_longitude_search
-                and place['latitude'] >= latitude - range_of_longitude_search and place['latitude'] <= latitude + range_of_longitude_search):
+        if place['name'] == place_name:
             place['rating'] = rating
-            flag = 1
             break
-    if flag:
-        usersCollection.update_one({'username': username}, {
-                                   '$set': {'places': places}})
-    else:
-        add_place(user, "new_place", longitude, latitude, rating)
+    usersCollection.update_one({'username': username}, {
+                                '$set': {'places': places}})
     return "success"
 
 
