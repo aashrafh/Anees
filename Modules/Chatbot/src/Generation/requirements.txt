@@ -3,3 +3,6 @@ transformers==4.12.5
 datasets==1.16.1
 sentencepiece==0.1.96
 tensorboard==2.7.0
+fastapi
+pyngrok
+"uvicorn[standard]"
