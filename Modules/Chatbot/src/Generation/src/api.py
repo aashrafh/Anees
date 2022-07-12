@@ -42,8 +42,11 @@ def hello():
 
 
 @app.post("/arz")
-def arz_response(utter, history):
+def arz_response(data: Data):
     resp = ''
+    utter = data.utter
+    history = data.history
+    print(history)
     try:
         resp = arz.respond(utter, history)
     except:
@@ -58,6 +61,7 @@ def msa_response(data: Data):
     resp = ''
     utter = data.utter
     history = data.history
+    print(history)
     try:
         resp = msa.respond(utter, history)
     except:
@@ -69,4 +73,4 @@ def msa_response(data: Data):
 
 ngrok_tunnel = ngrok.connect(8000)
 print('Public URL:', ngrok_tunnel.public_url)
-uvicorn.run(app, port=8000)
+uvicorn.run(app, port=8000, debug='true')
