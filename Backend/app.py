@@ -4,14 +4,18 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 import sys
 import os
-module_path = os.path.abspath(os.path.join('E:\GP\Anees\Anees\Modules\Chatbot\src'))
+import requests
+import warnings
+warnings.filterwarnings("ignore")
+
+module_path = os.path.abspath(os.path.join('F:\coullage\Year 4\Anees\Modules\Chatbot\src'))
 if module_path not in sys.path:
     sys.path.append(module_path)
+print ("importing the main....")
 import main
-
+print("loading models....")
 stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
-# directory problem
-# call the models to load before using them
+print("finished loading models")
 app = Flask(__name__)
 CORS(app)
 app.config['MONGO_URI'] = "mongodb://localhost:27017/Anees"
@@ -27,12 +31,28 @@ def get_response():
     if user == None:
         return "there is no user with this username"
     
-    intent ,emotion ,response = main.main(text,stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm)
+    intent ,emotion ,response = main.main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm)
+    print ("Intent -> ", intent)
+    print ("Emotion ->", emotion)
+    print ("Response ->", response)
     add_emotion(user, emotion)
-    if intent == 'recommendation-movies':
+
+    if intent == 'general' or intent == 'greeting' or intent == 'thank':
+        messages = user['messages']
+        if len(messages) > 5:
+            messages = messages[:5]
+        messages = messages[::-1]
+        responseGeneral = requests.post(
+                    'http://d37f-104-196-240-134.ngrok.io/msa', data={'utter': text, 'history': messages})
+        print(responseGeneral)
+        add_conversation(user, text, 1)
+        add_conversation(user, responseGeneral['response'], 0)
+
+    elif intent == 'recommendation-movies':
         movies = response["movies"]
         for movie in list(movies["title"]):
             add_movie(user, movie)
+        response = {'movie': list(movies["title"])}
     elif intent == 'recommendation-places':
         locations = response["places"]
         for loc in locations:
@@ -68,7 +88,7 @@ def sign_up():
     for category in all_categories:
         movies_categories_liked.append({'name': category, 'rating': 0})
     usersCollection.insert_one({'username': username, 'password': password,
-                                'movies_categories_liked': movies_categories_liked, 'movies': [], 'places': [], 'emotions': ["joy"]})
+                                'movies_categories_liked': movies_categories_liked, 'movies': [], 'places': [], 'emotions': ["joy"],'messages': []})
     return "the user is created successfully"
 
 
@@ -108,27 +128,19 @@ def get_most_frequent_emotion():
 @app.route('/update_place_rating', methods=['PUT'])
 def update_place_rating():
     username = request.json['username']
-    longitude = request.json['longitude']
-    latitude = request.json['latitude']
+    place_name = request.json['place_name']
     rating = request.json['rating']
     rating = max(min(rating, 5), 0)
     user = usersCollection.find_one({'username': username})
     if user == None:
         return "there is no user with this username"
-    range_of_longitude_search = 1
     places = user['places']
-    flag = 0
     for place in places:
-        if (place['longitude'] >= longitude - range_of_longitude_search and place['longitude'] <= longitude + range_of_longitude_search
-                and place['latitude'] >= latitude - range_of_longitude_search and place['latitude'] <= latitude + range_of_longitude_search):
+        if place['name'] == place_name:
             place['rating'] = rating
-            flag = 1
             break
-    if flag:
-        usersCollection.update_one({'username': username}, {
-                                   '$set': {'places': places}})
-    else:
-        add_place(user, "new_place", longitude, latitude, rating)
+    usersCollection.update_one({'username': username}, {
+                                '$set': {'places': places}})
     return "success"
 
 
@@ -196,6 +208,13 @@ def add_place(user, placeName, address, rating=2.5):
              'address': address, 'duration': 0}
     places.insert(0, place)
     usersCollection.update_one({'username': username}, {'$set': {'places': places}})
+
+def add_conversation(user, message, id):
+    username = user['username']
+    messages = user['messages']
+    messageDB = {'isUser':id, 'message': message}
+    messages.insert(0, messageDB)
+    usersCollection.update_one({'username': username}, {'$set': {'messages': messages}})
 
 
 if __name__ == "__main__":

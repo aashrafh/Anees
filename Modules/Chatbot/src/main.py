@@ -108,56 +108,39 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
     emotion = sentimental_analysis.get_emotion(
         preprocessed_text, emotions_model, emotions_tf_idf)
     # Tasks
-    intent = intent_classifier.intent(
-        preprocessed_text, intent_model, tokenizer)
-    print(intent)
-    if intent == 'general' or intent == 'greeting' or intent == 'thank':
-        # call generation api
-        response["message"] = "انتا يلا من اسيوط"
-    else:
-        match intent:
-            case 'weather':
-                response["message"] = weather.main(
-                    tokens, tokens_verb_noun, ents)
-            case "schedule":
-                edited_time, tokens_used, filtered_tokens = time_extract.main(
-                    tokens, tokens_verb_noun)
-                content = content_extract.get_schedule_content(
-                    text, tokens_used, filtered_tokens)
-                response["edited_time"] = edited_time
-                response["content"] = content
-            case 'recommendation':
-                r_intent = recomm_intent.intent(
-                    preprocessed_text, recomm_intent_model, recomm_tokenizer)
-                print(r_intent)
-                if r_intent == 'movies':
-                    movie, categories = content_extract.get_movies_content(
-                        text, tokens, tokens_verb_noun)
-                    print(movie, categories)
-                    if movie != "" and len(categories) != 0:
-                        pass
-                    elif movie != "":
-                        response["movies"] = movie_recomm.general_recommendation(
-                            movie_recomm.get_movie_id(movie)[0])["similar_movies"][:3]
-                    elif len(categories) != 0:
-                        categories = np.array(categories)
-                        response["movies"] = movie_recomm.recommend_given_categories(
-                            categories[:, 0])
-                    else:
-                        pass
-                    intent = "recommendation-movies"
+    intent = intent_classifier.intent(preprocessed_text,intent_model,tokenizer)
+    match   intent:
+        case 'weather':
+            response["message"] = weather.main(tokens,tokens_verb_noun,ents)
+        case "schedule":
+            edited_time, tokens_used, filtered_tokens = time_extract.main(tokens, tokens_verb_noun)
+            content = content_extract.get_schedule_content(text, tokens_used, filtered_tokens)
+            response["edited_time"] = edited_time
+            response["content"] = content
+        case 'recommendation':
+            r_intent = recomm_intent.intent(preprocessed_text,recomm_intent_model,recomm_tokenizer)
+            if r_intent == 'movies':
+                movie, categories = content_extract.get_movies_content(text, tokens, tokens_verb_noun)
+                if movie != "" and len(categories) != 0:
+                    pass
+                elif movie != "":
+                    response["movies"] = movie_recomm.general_recommendation(movie_recomm.get_movie_id(movie)[0])["similar_movies"][:3]
+                elif len(categories) != 0:
+                    categories = np.array(categories)
+                    response["movies"] = movie_recomm.recommend_given_categories(categories[:,0])
                 else:
-                    location_data = location_recomm.search_by_text(
-                        preprocessed_text)
-                    locations = list()
-                    for loc in location_data[:3]:
-                        locations.append(
-                            {"الاسم": loc["name"], "تقييم المكان ": loc["rating"], "العنوان": loc["formatted_address"]})
-                    response["places"] = locations
-                    intent = "recommendation-places"
-            case default:
-                response = requests.post(
-                    'https://httpbin.org/post', data={'utter': '', 'history': []})
+                    pass
+                intent = "recommendation-movies"
+            else :
+                location_data = location_recomm.search_by_text(preprocessed_text)
+                locations = list()
+                for loc in location_data[:3]:
+                    locations.append({"الاسم":loc["name"],"تقييم المكان ":loc["rating"],"العنوان":loc["formatted_address"]})
+                response["places"] = locations
+                intent = "recommendation-places"
+        case default:
+            #call generation(Search) api
+            pass
     return intent, emotion, response
 
 # stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = get_models()
