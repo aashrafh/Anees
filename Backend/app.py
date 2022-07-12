@@ -39,14 +39,14 @@ def get_response():
 
     if intent == 'general' or intent == 'greeting' or intent == 'thank':
         messages = user['messages']
-        if len(messages) > 5:
-            messages = messages[:5]
+        if len(messages) > 4:
+            messages = messages[:4]
         messages = messages[::-1]
-        responseGeneral = requests.post(
-                    'http://d37f-104-196-240-134.ngrok.io/msa', data={'utter': text, 'history': messages})
-        print(responseGeneral)
+        response = requests.post(
+                    'http://6259-34-147-54-199.ngrok.io/arz', json={'utter': text, 'history': messages} )
+        response = response.json()
         add_conversation(user, text, 1)
-        add_conversation(user, responseGeneral['response'], 0)
+        add_conversation(user, response['response'], 0)
 
     elif intent == 'recommendation-movies':
         movies = response["movies"]
