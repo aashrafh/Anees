@@ -188,11 +188,15 @@ def edit_time (edits):
     # add the incremental values
     new_time = new_time + relativedelta(minutes= edits[0] * (not edits[4]), hours=edits[1] * (not edits[4]), days=edits[2] * (not edits[5]), months=edits[3] * (not edits[6]))
     if new_time <= now_time:
-        new_time = new_time + relativedelta(days=1)
+        new_time = new_time + relativedelta(minutes=1)
     if new_time <= now_time:
-        new_time = new_time - relativedelta(days=1) + relativedelta(months=1)
+        new_time = new_time - relativedelta(minutes=1) + relativedelta(hours=1)
     if new_time <= now_time:
-        new_time = new_time - relativedelta(days=1) - relativedelta(months=1) + relativedelta(years=1) 
+        new_time = new_time - relativedelta(minutes=1) - relativedelta(hours=1) + relativedelta(days=1)
+    if new_time <= now_time:
+        new_time = new_time - relativedelta(minutes=1) - relativedelta(hours=1) - relativedelta(days=1) + relativedelta(months=1)
+    if new_time <= now_time:
+        new_time = new_time - relativedelta(minutes=1) - relativedelta(hours=1) - relativedelta(days=1) - relativedelta(months=1) + relativedelta(years=1) 
     return new_time
 
 #------------------------------------------------------------------------

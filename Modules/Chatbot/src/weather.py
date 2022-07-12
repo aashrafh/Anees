@@ -36,10 +36,10 @@ def extract_time_location(tokens, tokens_verb_noun,ents):
 
 def get_weather(city_name, day , hour):
     api_key = "acc2137340c0aeb19d563cf85cf78595"
-    api_url = "http://api.openweathermap.org/data/2.5/forecast?q={}&appid={}&units=metric&lang=ar".format(city_name, api_key)
+    api_url = "https://api.openweathermap.org/data/2.5/forecast?q={}&appid={}&units=metric&lang=ar".format(city_name, api_key)
 
     response = requests.get(api_url)
-    response_dict = json.loads(response.text)
+    response_dict = response.json()
 	
     index = math.ceil((day*24 + hour) / 3)
     if index > 39:

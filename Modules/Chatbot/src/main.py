@@ -16,6 +16,7 @@ import dill
 import pos
 import pickle
 from tensorflow import keras
+import numpy as np
 
 def stopwords_extraction():
     file = open("../Data/stopwords.txt","r",encoding="utf-8")
@@ -58,6 +59,16 @@ def get_recomm_intent_models():
     tokenizer = pickle.load(open(filename, 'rb'))
     return m,tokenizer
 
+def get_location_recomm_model():
+    with open("../utils/location_recommender", 'rb') as in_strm:
+        location_recomm = dill.load(in_strm)
+    return location_recomm
+
+def get_movie_recomm_model():
+    with open("../utils/movie_recommender", 'rb') as in_strm:
+        movie_recomm = dill.load(in_strm)
+    return movie_recomm
+
 def NLU(text,stopwords,ner_instance,verbs,nouns):
     #Preprocessing
     text = preprocess.pre_process(text)
@@ -82,6 +93,8 @@ if __name__ == "__main__":
     emotions_model , emotions_tf_idf = get_emotion_models()
     intent_model,tokenizer = get_intent_models()
     recomm_intent_model,recomm_tokenizer = get_recomm_intent_models()
+    location_recomm = get_location_recomm_model()
+    movie_recomm = get_movie_recomm_model()
     
     #Start of chat
     spoken = 0
@@ -130,9 +143,23 @@ if __name__ == "__main__":
                     if r_intent == 'movies':
                         movie, categories = content_extract.get_movies_content(text, tokens, tokens_verb_noun)
                         print (movie, categories)
+                        if movie != "" and len(categories) != 0:
+                            pass
+                        elif movie != "":
+                            print(movie_recomm.general_recommendation(movie_recomm.get_movie_id(movie)[0])["similar_movies"][:3])
+                        elif len(categories) != 0:
+                            categories = np.array(categories)
+                            print(movie_recomm.recommend_given_categories(categories[:,0]))
+                        else:
+                            pass
                     else :
-                        place, categories = content_extract.get_places_content(text, tokens, tokens_verb_noun)
-                        print (place, categories)
+                        # place, categories = content_extract.get_places_content(text, tokens, tokens_verb_noun)
+                        # print (place, categories)
+                        location_data = location_recomm.search_by_text(preprocessed_text)
+                        locations = list()
+                        for loc in location_data[:3]:
+                            locations.append([{"الاسم":loc["name"],"تقييم المكان ":loc["rating"],"العنوان":loc["formatted_address"]}])
+                        print(locations)
                 case default:
                     #call generation(Search) api
                     pass

@@ -47,6 +47,11 @@ def get_movies_content (text, tokens, tokens_verb_noun):
     movies = df["title"].apply(func=get_movie)
     if movie not in list(movies):
         movie = ""
+    else:
+        mov_list = movie.split()
+        for i in range(len(mov_list)):
+            mov_list[i] = mov_list[i].capitalize()
+        movie = " ".join(mov_list)
     for index, word in enumerate(tokens):
         if tokens_verb_noun[index][1] == 'n':
             index, distance = get_closest_word_with_threshold(word,movies_bag_of_words_ar, 0.4)
