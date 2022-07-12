@@ -16,3 +16,6 @@ Modules/Chatbot/src/Sentimental_Analysis/data_preprocessing
 Modules/Chatbot/src/Sentimental_Analysis/pos_neg/new
 Modules/Chatbot/src/Recommendation_intent/intent/Data/
 Modules/Chatbot/src/Recommendation_intent/draft
+Modules/RecommendationSystem/utils
+Modules/RecommendationSystem/Data
+Modules/Chatbot/utils/movie_recommender
