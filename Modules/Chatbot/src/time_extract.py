@@ -178,6 +178,7 @@ def get_time(tokens, task):
 # it is a static code any error will result into a disaster XD
 #---------------------------------------------------------------------------
 def edit_time (edits):
+    now_time = datetime.now()
     # create new time with the overwrite values
     new_time = datetime(year= now_time.year
                         , month= ( edits[3] * edits[6] ) + ( now_time.month * (not edits[6]) )
@@ -186,7 +187,6 @@ def edit_time (edits):
                         , minute=( edits[0] * edits[4] ) + ( now_time.minute * (not edits[4]) ))
     # add the incremental values
     new_time = new_time + relativedelta(minutes= edits[0] * (not edits[4]), hours=edits[1] * (not edits[4]), days=edits[2] * (not edits[5]), months=edits[3] * (not edits[6]))
-    now_time = datetime.now()
     if new_time <= now_time:
         new_time = new_time + relativedelta(minutes=1)
     if new_time <= now_time:
