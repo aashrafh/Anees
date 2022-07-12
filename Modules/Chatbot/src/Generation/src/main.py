@@ -17,6 +17,8 @@ if __name__ == '__main__':
                         help="The prefix of the train data files' name.")
     parser.add_argument('--valid_prefix', type=str, default="valid",
                         help="The prefix of the validation data files' name.")
+    parser.add_argument('--encode_prefix', type=str, default="",
+                        help="The prefix of the encode function used in tokenization.")
     parser.add_argument('--model_type', type=str,
                         default="aubmindlab/aragpt2-base", help="The name of the model of a path to local trained model")
     parser.add_argument('--bos_token', type=str,

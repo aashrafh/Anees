@@ -1,4 +1,4 @@
-from transformers import GPT2TokenizerFast, GPT2LMHeadModel, get_polynomial_decay_schedule_with_warmup
+from transformers import GPT2TokenizerFast, GPT2Tokenizer, GPT2LMHeadModel, get_polynomial_decay_schedule_with_warmup
 from anees_dataset import *
 from preprocess import *
 from tqdm import tqdm
@@ -28,7 +28,9 @@ class AneesTrainer():
             self.args.device = torch.device("cpu")
 
         print("Loading the tokenizer...")
-        self.tokenizer = GPT2TokenizerFast.from_pretrained(
+        # self.tokenizer = GPT2TokenizerFast.from_pretrained(
+        #     self.args.model_type)
+        self.tokenizer = GPT2Tokenizer.from_pretrained(
             self.args.model_type)
         special_tokens = {
             'bos_token': self.args.bos_token,
@@ -268,7 +270,8 @@ class AneesTrainer():
                     print("أنيس: إلى اللقاء")
                     break
                 utter = preprocess(utter)  # Preprocess the utterance
-                input_ids = [self.args.sp1_id] + self.tokenizer.encode(utter)
+                input_ids = [self.args.sp1_id] + \
+                    self.tokenizer.encode(self.args.encode_prefix + utter)
                 input_hists.append(input_ids)
 
                 # If the number of turns is greater than the maximum turns
@@ -306,7 +309,7 @@ class AneesTrainer():
                 res = self.tokenizer.decode(
                     output_ids, skip_special_tokens=True)  # Decode the output ids
 
-                print(f"أنيس: {res}")
+                print(f"أنيس: {res.replace(self.args.encode_prefix, '')}")
                 input_hists.append([self.args.sp2_id] +
                                    self.tokenizer.encode(res))  # Add the output to the input history
 

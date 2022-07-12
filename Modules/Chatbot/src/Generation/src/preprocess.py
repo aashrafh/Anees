@@ -67,7 +67,7 @@ def preprocess(text):
     return text
 
 
-def tokenize_arabic_data(tokenizer, prefix):
+def tokenize_arabic_data(tokenizer, prefix, dialect_prefix):
     print(f"Loading the {prefix} utters...")
 
     dials = []
@@ -80,12 +80,13 @@ def tokenize_arabic_data(tokenizer, prefix):
         dial_ids = []
         for utter in dial:
             proecessed_utter = preprocess(utter)
-            tokens = tokenizer.tokenize(proecessed_utter)
-            token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            # tokens = tokenizer.tokenize(proecessed_utter)
+            # token_ids = tokenizer.convert_tokens_to_ids(tokens)
+            token_ids = tokenizer.encode(dialect_prefix + proecessed_utter)
             dial_ids.append(token_ids)
         ids.append(dial_ids)
 
     assert len(ids) == len(dials)
-    with open(f"{DATA_PATH}/{prefix}_ids.json", 'w') as f:
-        json.dump(ids, f)
+    with open(f"{DATA_PATH}/monsoon_{prefix}_ids.json", 'w') as f:
+        json.dump(ids, f, ensure_ascii=False)
     print(f"Saved the {prefix} ids.")
