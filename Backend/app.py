@@ -2,7 +2,14 @@ from urllib import request
 from flask import Flask, request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
+import sys
+import os
+module_path = os.path.abspath(os.path.join('E:\GP\Anees\Anees\Modules\Chatbot\src'))
+if module_path not in sys.path:
+    sys.path.append(module_path)
+import main
 
+stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
 # directory problem
 # call the models to load before using them
 app = Flask(__name__)
@@ -15,22 +22,23 @@ usersCollection = mongo.db.users
 @app.route('/getResponse', methods=['GET'])
 def get_response():
     username = request.json['username']
+    text = request.json['text']
     user = usersCollection.find_one({'username': username})
     if user == None:
         return "there is no user with this username"
-    # call the main function and get the response and the intent and return it
-    intent = "recommendation"
-    emotion = "joy"
-    response = "ok"
+    
+    intent ,emotion ,response = main.main(text,stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm)
     add_emotion(user, emotion)
     if intent == 'recommendation-movies':
-        movie = "Toy Story"
-        add_movie(user, movie)
+        movies = response["movies"]
+        for movie in movies:
+            add_movie(user, movie)
     elif intent == 'recommendation-places':
-        place = "Home"
-        longitude = 12
-        latitude = 13
-        add_place(user, place, longitude, latitude)
+        locations = response["places"]
+        for loc in locations:
+            place = loc['الاسم']
+            address = loc['العنوان']
+            add_place(user, place, address)
     return {'response': response, 'intent': intent}
 # intents ->  recommendation-movies, recommendation-places, schedule, weather, general, *search*, None
 
@@ -177,11 +185,11 @@ def add_movie(user, movieName, rating=2.5):
     usersCollection.update_one({'username': username}, {'$set': {'movies': movies}})
 
 
-def add_place(user, placeName, longitude, latitude, rating=2.5):
+def add_place(user, placeName, address, rating=2.5):
     username = user['username']
     places = user['places']
     place = {'name': placeName, 'rating': rating,
-             'longitude': longitude, 'latitude': latitude, 'duration': 0}
+             'address': address, 'duration': 0}
     places.insert(0, place)
     usersCollection.update_one({'username': username}, {'$set': {'places': places}})
 
