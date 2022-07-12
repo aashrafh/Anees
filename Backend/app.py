@@ -31,7 +31,7 @@ def get_response():
     add_emotion(user, emotion)
     if intent == 'recommendation-movies':
         movies = response["movies"]
-        for movie in movies:
+        for movie in list(movies["title"]):
             add_movie(user, movie)
     elif intent == 'recommendation-places':
         locations = response["places"]
@@ -72,7 +72,7 @@ def sign_up():
     return "the user is created successfully"
 
 
-@app.route('/emotions', methods=['get'])
+@app.route('/emotions', methods=['GET'])
 def get_most_frequent_emotion():
     username = request.json['username']
     user = usersCollection.find_one({'username': username})
@@ -80,24 +80,28 @@ def get_most_frequent_emotion():
         return "there is no user with this username"
     emotions = user['emotions']
     # get most frequent emotion using half of his last messages
-    most_frequent_emotion = max(set(emotions), key=emotions.count)
+    if len(emotions) < 5:
+        return {}, "None"    
+    most_frequent_emotion = max(set(emotions[:5]), key=emotions.count)
     response = {}
     intent = "None"
-    if most_frequent_emotion == 'anger':
+    if most_frequent_emotion == 'sadness':
         intent = "recommendation-movies-auto"
-        categories_liked = user['movies_categories_liked']
+        categories_liked = ['comedy','musical']
         # call the recommendation movies using the categories liked
-        movie = "movie_recommended"
-        add_movie(user, movie)
-        response = {'movie': movie}
-    elif most_frequent_emotion == 'sadness':
+        movies = movie_recomm.recommend_given_categories(categories_liked)
+        for movie in list(movies["title"]):
+            add_movie(user, movie)
+        response = {'movie': list(movies["title"])}
+    elif most_frequent_emotion == 'anger':
+        location_data = location_recomm.search_by_text("عايز اروح مكان هادى")
+        locations = list()
+        for loc in location_data[:3]:
+            locations.append({"الاسم":loc["name"],"تقييم المكان ":loc["rating"],"العنوان":loc["formatted_address"]})
+            add_place(user, loc["name"], loc["formatted_address"])
         intent = "recommendation-places-auto"
-        place = ""
-        longitude = ""
-        latitude = ""
-        add_place(user, place, longitude, latitude)
         # call the recommendation places using the most frequent place
-        response = {'place', place}
+        response = {'place': locations}
     return {'response': response, 'intent': intent}
 
 
