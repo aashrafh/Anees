@@ -254,6 +254,47 @@ class AneesTrainer():
 
         return valid_loss, valid_ppl
 
+    def respond(self, utter, history=[]):
+        with torch.no_grad():
+            input_hists = [[self.args.sp1_id] + self.tokenizer.encode(res) if i % 2 == 0 else [
+                self.args.sp2_id] + self.tokenizer.encode(self.args.encode_prefix + res) for i, res in enumerate(history)]
+            utter = preprocess(utter)
+            input_ids = [self.args.sp1_id] + \
+                self.tokenizer.encode(self.args.encode_prefix + utter)
+            input_hists.append(input_ids)
+
+            if len(input_hists) >= self.args.max_turns:
+                num_exceeded = len(input_hists) - self.args.max_turns + 1
+                input_hists = input_hists[num_exceeded:]
+
+            input_ids = [self.args.bos_id] + \
+                list(chain.from_iterable(input_hists)) + [self.args.sp2_id]
+
+            start_sp_id = input_hists[0][0]
+            next_sp_id = self.args.sp1_id if start_sp_id == self.args.sp2_id else self.args.sp2_id
+            assert start_sp_id != next_sp_id
+
+            token_type_ids = [[start_sp_id] * len(hist) if h % 2 == 0 else [
+                next_sp_id] * len(hist) for h, hist in enumerate(input_hists)]
+            assert len(token_type_ids) == len(input_hists)
+
+            token_type_ids = [
+                start_sp_id] + list(chain.from_iterable(token_type_ids)) + [self.args.sp2_id]
+            assert len(input_ids) == len(token_type_ids)
+            input_len = len(input_ids)
+
+            input_ids = torch.LongTensor(
+                input_ids).unsqueeze(0).to(self.args.device)
+            token_type_ids = torch.LongTensor(
+                token_type_ids).unsqueeze(0).to(self.args.device)
+
+            output_ids = self.nucleus_sampling(
+                input_ids, token_type_ids, input_len)
+            res = self.tokenizer.decode(
+                output_ids, skip_special_tokens=True)
+
+            return res.replace(self.args.encode_prefix, '')
+
     def interact(self):
         print("Start interaction...")
         print(
