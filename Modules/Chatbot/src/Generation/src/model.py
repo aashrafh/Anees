@@ -256,8 +256,8 @@ class AneesTrainer():
 
     def respond(self, utter, history=[]):
         with torch.no_grad():
-            input_hists = [[self.args.sp1_id] + self.tokenizer.encode(res) if i % 2 == 0 else [
-                self.args.sp2_id] + self.tokenizer.encode(self.args.encode_prefix + res) for i, res in enumerate(history)]
+            input_hists = [[self.args.sp1_id] + self.tokenizer.encode(self.args.encode_prefix + res["message"]) if res["isUser"] == 1 else [
+                self.args.sp2_id] + self.tokenizer.encode(self.args.encode_prefix + res["message"]) for i, res in enumerate(history)]
             utter = preprocess(utter)
             input_ids = [self.args.sp1_id] + \
                 self.tokenizer.encode(self.args.encode_prefix + utter)

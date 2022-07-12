@@ -1,6 +1,8 @@
 import uvicorn
+from typing import List
 from pyngrok import ngrok
 from fastapi import FastAPI
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 from main import load_arz_model, load_msa_model
 
@@ -8,7 +10,7 @@ from main import load_arz_model, load_msa_model
 BASE_PATH = '/content/drive/MyDrive/anees'
 
 print("Loading the ARZ model...")
-arz = load_arz_model(f'{BASE_PATH}/data', f'{BASE_PATH}/chats_monsoon_ckpts',
+arz = load_arz_model(f'{BASE_PATH}/data/chats', f'{BASE_PATH}/chats_monsoon_ckpts',
                      'best_ckpt_epoch=2_valid_loss=4.4047')
 
 print("Loading the MSA model...")
@@ -25,6 +27,11 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+class Data(BaseModel):
+    utter: str
+    history: List[dict]
 
 
 @app.get("/")
@@ -47,8 +54,10 @@ def arz_response(utter, history):
 
 
 @app.post("/msa")
-def msa_response(utter, history):
+def msa_response(data: Data):
     resp = ''
+    utter = data.utter
+    history = data.history
     try:
         resp = msa.respond(utter, history)
     except:
