@@ -2,10 +2,11 @@ from urllib import request
 from flask import Flask, request
 from flask_pymongo import PyMongo
 from flask_cors import CORS
+import warnings
 import sys
 import os
 import requests
-import warnings
+from datetime import datetime
 import numpy as np
 warnings.filterwarnings("ignore")
 
@@ -20,9 +21,7 @@ usersCollection = mongo.db.users
 
 print ("importing the main....")
 import main
-print("loading models....")
-stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
-print("finished loading models")
+
 
 
 @app.route('/getResponse', methods=['POST'])
@@ -51,9 +50,13 @@ def get_response():
 
     elif intent == 'recommendation-movies':
         response = movies_recommendation(user, response['movie'], response['categories'], "")
+        add_conversation(user, text, 1)
+        add_conversation(user, response['text'], 0)
 
     elif intent == 'recommendation-places':
         response = locations_recommendation(user, response['places'], "")
+        add_conversation(user, text, 1)
+        add_conversation(user, response['text'], 0)
 
     return {'response': response, 'intent': intent}
 
@@ -207,7 +210,7 @@ def add_place(user, placeName, address, rating=2.5):
 def add_conversation(user, message, id):
     username = user['username']
     messages = user['messages']
-    messageDB = {'isUser':id, 'message': message}
+    messageDB = {'isUser':id, 'message': message, 'time': datetime.now()}
     messages.insert(0, messageDB)
     usersCollection.update_one({'username': username}, {'$set': {'messages': messages}})
 
@@ -234,25 +237,27 @@ def movies_recommendation(user ,movie, categories, text):
         if len(categories_liked_filtered) == 0:
             categories_liked = [category['name'] for category in categories_liked]
             categories , relevance = get_relevance(categories_liked)
-            movies = movie_recomm.recommend_given_categories(categories , relevance)
+            movies = movie_recomm.recommend_given_categories(categories , relevance, top_k = 50)
 
         else :
             categories , relevance = get_relevance(categories_liked_filtered)
-            movies = movie_recomm.recommend_given_categories(categories , relevance)
+            movies = movie_recomm.recommend_given_categories(categories , relevance, top_k = 50)
 
     elif movie != "":
         movies = movie_recomm.general_recommendation(movie_recomm.get_movie_id(movie)[0])["similar_movies"]
 
     elif len(categories) != 0:
         categories , relevance = get_relevance(categories[:,0])
-        movies = movie_recomm.recommend_given_categories(categories , relevance)
+        movies = movie_recomm.recommend_given_categories(categories , relevance, top_k = 50)
 
     movies = list(movies["title"])
     user_movies = [movie['name'] for movie in user['movies']]
     movies_filtered = []
+    print(user_movies)
     for movie in movies:
         if movie not in user_movies:
             movies_filtered.append(movie)
+    print(movies_filtered)
     movies_filtered = movies_filtered[:2]
 
     for movie in movies_filtered:
@@ -278,10 +283,12 @@ def locations_recommendation(user, preprocessed_text, text):
         place = loc['الاسم']
         address = loc['العنوان']
         add_place(user, place, address)
-    print(locations)
     text = send_recommendation(text, "places", locations)
     response = {'text': text}
     return response
 
 if __name__ == "__main__":
+    print("loading models....")
+    stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
+    print("finished loading models")
     app.run(debug=True)
