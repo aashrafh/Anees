@@ -9,6 +9,9 @@ API_KEY*
 Modules/RecommendationSystem/Data
 .vscode
 API_KEY*
+*.pb
+*.index
+*.sav
 Modules/RecommendationSystem/Data
 Modules/Chatbot/src/Intent_Classification/Data/
 Modules/Chatbot/src/Sentimental_Analysis/Data
