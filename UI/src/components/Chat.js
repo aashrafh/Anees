@@ -1,6 +1,19 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
+import axios from "axios";
+import { api } from "../api";
+
+// {
+//   _id: 1,
+//   text: "Hello 1",
+//   createdAt: new Date(),
+//   user: {
+//     _id: 2,
+//     name: "React Native",
+//     avatar: "https://placeimg.com/140/140/any",
+//   },
+// },
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -28,41 +41,6 @@ const Chat = () => {
     );
   };
 
-  useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: "Hello 1",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 3,
-        text: "Hello 3",
-        createdAt: new Date(),
-        user: {
-          _id: 2,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-      {
-        _id: 2,
-        text: "Hello 2",
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: "React Native",
-          avatar: "https://placeimg.com/140/140/any",
-        },
-      },
-    ]);
-  }, []);
-
   const onSend = useCallback((messages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages)
@@ -70,21 +48,34 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    if (messages[0]?.user?._id === 1) {
-      setMessages((previousMessages) =>
-        GiftedChat.append(previousMessages, [
-          {
-            _id: messages.length + 1,
-            text: "Recieved!",
-            createdAt: new Date(),
-            user: {
-              _id: 2,
-              name: "React Native",
-              avatar: "https://placeimg.com/140/140/any",
-            },
+    if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      api
+        .get("/getResponse", {
+          data: {
+            username: "Ahmed",
+            text: messages[0].text,
           },
-        ])
-      );
+        })
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      // setMessages((previousMessages) =>
+      //   GiftedChat.append(previousMessages, [
+      //     {
+      //       _id: messages.length + 1,
+      //       text: "Recieved!",
+      //       createdAt: new Date(),
+      //       user: {
+      //         _id: 2,
+      //         name: "React Native",
+      //         avatar: "https://placeimg.com/140/140/any",
+      //       },
+      //     },
+      //   ])
+      // );
     }
   }, [messages]);
 
