@@ -163,6 +163,7 @@ def get_time(tokens, task):
     for token in tokens:
         if token == "بكره":
             edits[2] = 1
+            tokens_used[tokens.index(token)] = 1
         elif token in time_specifiers_tokens:
             tokens_used[tokens.index(token)] = 1
             edits[7] = time_specifiers_tokens.get(token)[0]   
