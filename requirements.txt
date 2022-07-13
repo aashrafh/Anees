@@ -1,0 +1,13 @@
+Flask
+Flask-PyMongo
+flask-cors
+requests
+numpy
+tensorflow
+pandas
+scikit-learn
+pickle4
+matplotlib
+nltk
+dill
+googlemaps
