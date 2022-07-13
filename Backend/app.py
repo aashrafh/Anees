@@ -6,24 +6,26 @@ import sys
 import os
 import requests
 import warnings
+import numpy as np
 warnings.filterwarnings("ignore")
 
 module_path = os.path.abspath(os.path.join('F:\coullage\Year 4\Anees\Modules\Chatbot\src'))
 if module_path not in sys.path:
     sys.path.append(module_path)
-print ("importing the main....")
-import main
-print("loading models....")
-stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
-print("finished loading models")
 app = Flask(__name__)
 CORS(app)
 app.config['MONGO_URI'] = "mongodb://localhost:27017/Anees"
 mongo = PyMongo(app)
 usersCollection = mongo.db.users
 
+print ("importing the main....")
+import main
+print("loading models....")
+stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
+print("finished loading models")
 
-@app.route('/getResponse', methods=['GET'])
+
+@app.route('/getResponse', methods=['POST'])
 def get_response():
     username = request.json['username']
     text = request.json['text']
@@ -34,7 +36,6 @@ def get_response():
     intent ,emotion ,response = main.main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm)
     print ("Intent -> ", intent)
     print ("Emotion ->", emotion)
-    print ("Response ->", response)
     add_emotion(user, emotion)
 
     if intent == 'general' or intent == 'greeting' or intent == 'thank':
@@ -49,19 +50,22 @@ def get_response():
         add_conversation(user, response['response'], 0)
 
     elif intent == 'recommendation-movies':
-        movies = response["movies"]
-        for movie in list(movies["title"]):
-            add_movie(user, movie)
-        response = {'movie': list(movies["title"])}
-    elif intent == 'recommendation-places':
-        locations = response["places"]
-        for loc in locations:
-            place = loc['الاسم']
-            address = loc['العنوان']
-            add_place(user, place, address)
-    return {'response': response, 'intent': intent}
-# intents ->  recommendation-movies, recommendation-places, schedule, weather, general, *search*, None
+        response = movies_recommendation(user, response['movie'], response['categories'], "")
 
+    elif intent == 'recommendation-places':
+        response = locations_recommendation(user, response['places'], "")
+
+    return {'response': response, 'intent': intent}
+
+# intents ->  recommendation-movies, recommendation-places, schedule, weather, general, *search*, None
+@app.route('/history', methods=['POST'])
+def get_history():
+    username = request.json['username']
+    user = usersCollection.find_one({'username': username})
+    if user == None:
+        return "there is no user with this username"
+    history = user['messages']
+    return {'response' : history, 'intent': 'history'}
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -99,7 +103,7 @@ def get_most_frequent_emotion():
     if user == None:
         return "there is no user with this username"
     emotions = user['emotions']
-    # get most frequent emotion using half of his last messages
+    # get most frequent emotion using the last 5 messages
     if len(emotions) < 5:
         return {}, "None"    
     most_frequent_emotion = max(set(emotions[:5]), key=emotions.count)
@@ -107,21 +111,12 @@ def get_most_frequent_emotion():
     intent = "None"
     if most_frequent_emotion == 'sadness':
         intent = "recommendation-movies-auto"
-        categories_liked = ['comedy','musical']
-        # call the recommendation movies using the categories liked
-        movies = movie_recomm.recommend_given_categories(categories_liked)
-        for movie in list(movies["title"]):
-            add_movie(user, movie)
-        response = {'movie': list(movies["title"])}
+        response = movies_recommendation(user, "", np.array([['comedy',5],['musical',5]]), "من محادثاتك الاخيرة معايا حسيت انك حزين\n")
+
     elif most_frequent_emotion == 'anger':
-        location_data = location_recomm.search_by_text("عايز اروح مكان هادى")
-        locations = list()
-        for loc in location_data[:3]:
-            locations.append({"الاسم":loc["name"],"تقييم المكان ":loc["rating"],"العنوان":loc["formatted_address"]})
-            add_place(user, loc["name"], loc["formatted_address"])
         intent = "recommendation-places-auto"
-        # call the recommendation places using the most frequent place
-        response = {'place': locations}
+        response = locations_recommendation(user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n")
+
     return {'response': response, 'intent': intent}
 
 
@@ -216,6 +211,77 @@ def add_conversation(user, message, id):
     messages.insert(0, messageDB)
     usersCollection.update_one({'username': username}, {'$set': {'messages': messages}})
 
+def send_recommendation(text ,type, contents):
+    if type == "movies":
+        text += "جبتلك فيلمين اهو ياريت يعجبوك\n\n"
+        text += contents[0] + "\n\n"
+        text += contents[1] + "\n\n"
+        text += "\nوكمان شوية هبعتلك رسالة تقولى رأيك فيهم لو كونت شوفتهم"
+    else:
+        text += "جبتلك مكانين اهو ياريت يعجبوك\n\n"
+        for content in contents:
+            text += "الاسم : " + content['الاسم'] + "\n"
+            text += "العنوان : " + content['العنوان'] + "\n\n"
+        text += "\nوكمان شوية هبعتلك رسالة تقولى رأيك فيهم لو كونت زرتهم"
+    return text 
+
+def movies_recommendation(user ,movie, categories, text):
+    print("calling the movies module...")
+    categories_liked = user['movies_categories_liked']
+    if movie == "" and len(categories) == 0:
+        categories_liked_filtered = [category['name'] for category in categories_liked if category['rating'] >= 3]
+        print(categories_liked_filtered)
+        if len(categories_liked_filtered) == 0:
+            categories_liked = [category['name'] for category in categories_liked]
+            categories , relevance = get_relevance(categories_liked)
+            movies = movie_recomm.recommend_given_categories(categories , relevance)
+
+        else :
+            categories , relevance = get_relevance(categories_liked_filtered)
+            movies = movie_recomm.recommend_given_categories(categories , relevance)
+
+    elif movie != "":
+        movies = movie_recomm.general_recommendation(movie_recomm.get_movie_id(movie)[0])["similar_movies"]
+
+    elif len(categories) != 0:
+        categories , relevance = get_relevance(categories[:,0])
+        movies = movie_recomm.recommend_given_categories(categories , relevance)
+
+    movies = list(movies["title"])
+    user_movies = [movie['name'] for movie in user['movies']]
+    movies_filtered = []
+    for movie in movies:
+        if movie not in user_movies:
+            movies_filtered.append(movie)
+    movies_filtered = movies_filtered[:2]
+
+    for movie in movies_filtered:
+        add_movie(user, movie)
+    text = send_recommendation(text, "movies", movies_filtered)
+    response = {'text': text}
+    return response
+
+def get_relevance(categories):
+    if len(categories) == 1:
+        return categories, [0.8]
+    if len(categories) == 2:
+        return categories, [0.6, 0.6]
+    return categories[:3], [0.5, 0.5, 0.5]
+
+def locations_recommendation(user, preprocessed_text, text):
+    print("calling the locations module...")
+    location_data = location_recomm.search_by_text(preprocessed_text)
+    locations = list()
+    for loc in location_data[:3]:
+        locations.append({"الاسم":loc["name"],"تقييم المكان ":loc["rating"],"العنوان":loc["formatted_address"]})
+    for loc in locations:
+        place = loc['الاسم']
+        address = loc['العنوان']
+        add_place(user, place, address)
+    print(locations)
+    text = send_recommendation(text, "places", locations)
+    response = {'text': text}
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)
