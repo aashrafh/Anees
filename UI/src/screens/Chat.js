@@ -22,7 +22,7 @@ const Chat = () => {
 
   const renderBubble = (props) => {
     const wrapperStyle = {
-      padding: 0.5,
+      padding: "0.5",
     };
     const bottomContainerStyle = {
       display: "none",
