@@ -27,18 +27,18 @@ import main
 @app.route('/getResponse', methods=['POST'])
 def get_response():
     username = request.json['username']
+    username = username.strip()
     text = request.json['text']
     user = usersCollection.find_one({'username': username})
     if user == None:
          return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
 
-    intent, emotion, response = main.main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf,
-                                          intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm)
+    intent, emotion, response = main.main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, q_not_model, tf_idf_q_not)
     print("Intent -> ", intent)
     print("Emotion ->", emotion)
     add_emotion(user, emotion)
 
-    if intent == 'general' or intent == 'greeting' or intent == 'thank':
+    if intent == 'general':
         messages = user['messages']
         if len(messages) > 4:
             messages = messages[:4]
@@ -46,19 +46,16 @@ def get_response():
         response = requests.post(
             'http://6259-34-147-54-199.ngrok.io/arz', json={'utter': text, 'history': messages})
         response = response.json()
-        add_conversation(user, text, 1)
-        add_conversation(user, response['response'], 0)
+        response['text'] = response['response']
 
     elif intent == 'recommendation-movies':
         response = movies_recommendation(user, response['movie'], response['categories'], "")
-        add_conversation(user, text, 1)
-        add_conversation(user, response['text'], 0)
 
     elif intent == 'recommendation-places':
         response = locations_recommendation(user, response['places'], "")
-        add_conversation(user, text, 1)
-        add_conversation(user, response['text'], 0)
 
+    add_conversation(user, text, 1)
+    add_conversation(user, response['text'], 0)
     return {'response': response, 'intent': intent}
 
 # intents ->  recommendation-movies, recommendation-places, schedule, weather, general, *search*, None
@@ -67,6 +64,7 @@ def get_response():
 @app.route('/history', methods=['POST'])
 def get_history():
     username = request.json['username']
+    username = username.strip()
     user = usersCollection.find_one({'username': username})
     if user == None:
          return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
@@ -77,6 +75,7 @@ def get_history():
 @app.route('/login', methods=['POST'])
 def login():
     username = request.json['username']
+    username = username.strip()
     password = request.json['password']
     user = usersCollection.find_one(
         {'username': username, 'password': password})
@@ -88,6 +87,7 @@ def login():
 @app.route('/signup', methods=['POST'])
 def sign_up():
     username = request.json['username']
+    username = username.strip()
     password = request.json['password']
     user = usersCollection.find_one({'username': username})
     if user != None:
@@ -106,6 +106,7 @@ def sign_up():
 @app.route('/emotions', methods=['GET'])
 def get_most_frequent_emotion():
     username = request.json['username']
+    username = username.strip()
     user = usersCollection.find_one({'username': username})
     if user == None:
          return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
@@ -132,6 +133,7 @@ def get_most_frequent_emotion():
 @app.route('/update_place_rating', methods=['PUT'])
 def update_place_rating():
     username = request.json['username']
+    username = username.strip()
     place_name = request.json['place_name']
     rating = request.json['rating']
     rating = max(min(rating, 5), 0)
@@ -151,6 +153,7 @@ def update_place_rating():
 @app.route('/update_movie_rating', methods=['PUT'])
 def update_movie_rating():
     username = request.json['username']
+    username = username.strip()
     movie_name = request.json['movie_name']
     rating = request.json['rating']
     rating = max(min(rating, 5), 0)
@@ -174,6 +177,7 @@ def update_movie_rating():
 @app.route('/update_category_rating', methods=['PUT'])
 def update_category_rating():
     username = request.json['username']
+    username = username.strip()
     category_name = request.json['category_name']
     rating = request.json['rating']
     rating = max(min(rating, 5), 0)
@@ -307,6 +311,6 @@ def locations_recommendation(user, preprocessed_text, text):
 
 if __name__ == "__main__":
     print("loading models....")
-    stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = main.get_models()
+    stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm,q_not_model , tf_idf_q_not = main.get_models()
     print("finished loading models")
     app.run(debug=True)
