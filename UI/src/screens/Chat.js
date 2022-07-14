@@ -1,24 +1,18 @@
-import React, { useEffect, useCallback, useState } from "react";
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
-import { View, KeyboardAvoidingView, Platform } from "react-native";
-import axios from "axios";
+import React, { useEffect, useCallback, useState, useContext } from "react";
+import { GiftedChat, Bubble, MessageText } from "react-native-gifted-chat";
+import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import HtmlView from "react-native-htmlview";
 import { api } from "../api";
+import * as SecureStore from "expo-secure-store";
+import { TokenContext } from "../../context";
 
-// {
-//   _id: 1,
-//   text: "Hello 1",
-//   createdAt: new Date(),
-//   user: {
-//     _id: 2,
-//     name: "React Native",
-//     avatar: "https://placeimg.com/140/140/any",
-//   },
-// },
+const aneesAvatar = require("../../assets/images/aneesAvatar.png");
+const userAvatar = require("../../assets/images/userAvatar.png");
+
 const Chat = () => {
-  const aneesAvatar = "../../UI/assets/images/Anees.png";
-  const userAvatar = "https://placeimg.com/140/140/any";
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
+  const [token, setToken] = useContext(TokenContext);
 
   const renderBubble = (props) => {
     const wrapperStyle = {
@@ -43,18 +37,49 @@ const Chat = () => {
     );
   };
 
+  const renderMessageText = (props) => {
+    const { currentMessage } = props;
+    const containsHtml = /<\/?[a-z][\s\S]*>/i.test(currentMessage.text);
+    if (containsHtml) {
+      return <HtmlView value={currentMessage.text} stylesheet={htmlMsg} />;
+    }
+    return <MessageText {...props} />;
+  };
+
   const onSend = useCallback((messages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages)
     );
   }, []);
 
+  const onLogout = () => {
+    SecureStore.deleteItemAsync("username").then(() => {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: "استمتعت بالكلام معاك، اتمنى اشوفك تاني",
+            createdAt: new Date(),
+            user: {
+              _id: 0,
+              name: "أنيس",
+              avatar: aneesAvatar,
+            },
+          },
+        ])
+      );
+      setTimeout(() => {
+        setToken("");
+      }, 1000);
+    });
+  };
+
   useEffect(() => {
     api
       .post("/history", { username: "Ahmed" })
       .then((res) => {
         const history = res.data.response;
-        console.log(history);
+
         setMessages(
           history.map((item, index) => ({
             _id: index,
@@ -75,6 +100,11 @@ const Chat = () => {
 
   useEffect(() => {
     if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      if (messages[0].text === "سلام") {
+        onLogout();
+        return;
+      }
+
       setIsAneesTyping(true);
       console.log("after true " + isAneesTyping);
       api
@@ -83,21 +113,24 @@ const Chat = () => {
           text: messages[0].text,
         })
         .then((res) => {
-          console.log(res);
-          setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, [
-              {
-                _id: messages.length + 1,
-                text: res.data.response.text,
-                createdAt: new Date(),
-                user: {
-                  _id: 0,
-                  name: "أنيس",
-                  avatar: aneesAvatar,
+          if (res.data.response.intent === "search") {
+            console.log("Search", res.data.response);
+          } else {
+            setMessages((previousMessages) =>
+              GiftedChat.append(previousMessages, [
+                {
+                  _id: messages.length + 1,
+                  text: res.data.response.text,
+                  createdAt: new Date(),
+                  user: {
+                    _id: 0,
+                    name: "أنيس",
+                    avatar: aneesAvatar,
+                  },
                 },
-              },
-            ])
-          );
+              ])
+            );
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -120,13 +153,27 @@ const Chat = () => {
         }}
         user={{
           _id: 1,
-          avatar: "https://i.pravatar.cc/300",
+          avatar: userAvatar,
         }}
         renderBubble={renderBubble}
+        renderMessageText={renderMessageText}
       />
       {Platform.OS === "android" && <KeyboardAvoidingView behavior="padding" />}
     </View>
   );
 };
+
+const htmlMsg = StyleSheet.create({
+  ul: {
+    padding: "5%",
+  },
+  ol: {
+    padding: "5%",
+  },
+  a: {
+    fontWeight: "300",
+    color: "#2B9BED", // make links coloured pink
+  },
+});
 
 export default Chat;
