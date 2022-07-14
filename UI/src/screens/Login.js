@@ -24,7 +24,7 @@ const Login = ({ navigation }) => {
       })
       .catch((err) => {
         console.log(err.response);
-        Alert.alert("حصل مشكلة :(", err.response.data.message, [
+        Alert.alert("حصل مشكلة 😥", err.response.data.message, [
           { text: "حاول تاني", onPress: () => console.log("OK Pressed") },
         ]);
       });
@@ -89,11 +89,11 @@ const styles = StyleSheet.create({
 
   actions: {
     width: "90%",
-    border: "none",
+    //border: "none",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    gap: "5%",
+    //gap: 5,
   },
 
   inputView: {
@@ -108,11 +108,11 @@ const styles = StyleSheet.create({
   },
   form: {
     width: "90%",
-    border: "none",
+    //border: "none",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    gap: "5%",
+    //gap: 5,
   },
   TextInput: {
     height: 50,
