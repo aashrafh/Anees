@@ -1,5 +1,12 @@
 import React from "react";
-import { StyleSheet, View, TextInput, Image, Alert } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Image,
+  Alert,
+  I18nManager,
+} from "react-native";
 import { api } from "../api";
 import AppButton from "../components/AppButton";
 // import * as SecureStore from "expo-secure-store";
@@ -104,6 +111,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#64B5F4",
     borderRadius: 10,
     width: "80%",
+    textAlign: I18nManager.isRTL ? "right" : "left",
+    writingDirection: I18nManager.isRTL ? "rtl" : "ltr",
   },
   form: {
     width: "90%",

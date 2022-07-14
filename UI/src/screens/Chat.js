@@ -3,9 +3,10 @@ import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
 import { api } from "../api";
 
+const aneesAvatar = require("../../assets/images/aneesAvatar.png");
+const userAvatar = require("../../assets/images/userAvatar.png");
+
 const Chat = () => {
-  const aneesAvatar = "../../UI/assets/images/Anees.png";
-  const userAvatar = "https://placeimg.com/140/140/any";
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
 
@@ -43,7 +44,7 @@ const Chat = () => {
       .post("/history", { username: "Ahmed" })
       .then((res) => {
         const history = res.data.response;
-        console.log(history);
+        // console.log(history);
         setMessages(
           history.map((item, index) => ({
             _id: index,
@@ -72,7 +73,7 @@ const Chat = () => {
           text: messages[0].text,
         })
         .then((res) => {
-          console.log(res);
+          // console.log(res);
           setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, [
               {
@@ -109,7 +110,7 @@ const Chat = () => {
         }}
         user={{
           _id: 1,
-          avatar: "https://i.pravatar.cc/300",
+          avatar: userAvatar,
         }}
         renderBubble={renderBubble}
       />

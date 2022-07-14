@@ -12,9 +12,27 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="Chat" component={Chat} />
+        {/* <Stack.Screen
+          name="Login"
+          component={Login}
+          options={{
+            title: "تسجيل الدخول",
+          }}
+        /> */}
+        {/* <Stack.Screen
+          name="Signup"
+          component={Signup}
+          options={{
+            title: "تسجيل مستخدم جديد",
+          }}
+        /> */}
+        <Stack.Screen
+          name="Chat"
+          component={Chat}
+          options={{
+            title: "اتكلم مع انيسsdfsfdsfds",
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
