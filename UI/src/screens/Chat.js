@@ -1,19 +1,8 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
-import axios from "axios";
 import { api } from "../api";
 
-// {
-//   _id: 1,
-//   text: "Hello 1",
-//   createdAt: new Date(),
-//   user: {
-//     _id: 2,
-//     name: "React Native",
-//     avatar: "https://placeimg.com/140/140/any",
-//   },
-// },
 const Chat = () => {
   const aneesAvatar = "../../UI/assets/images/Anees.png";
   const userAvatar = "https://placeimg.com/140/140/any";
@@ -50,7 +39,6 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    setIsAneesTyping(true);
     api
       .post("/history", { username: "Ahmed" })
       .then((res) => {
@@ -68,16 +56,16 @@ const Chat = () => {
             },
           }))
         );
-        setIsAneesTyping(false);
       })
       .catch((err) => {
-        setIsAneesTyping(false);
         console.log(err);
       });
   }, []);
 
   useEffect(() => {
     if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      setIsAneesTyping(true);
+      console.log("after true " + isAneesTyping);
       api
         .post("/getResponse", {
           username: "Ahmed",
@@ -103,13 +91,15 @@ const Chat = () => {
         .catch((err) => {
           console.log(err);
         });
+      setIsAneesTyping(false);
+      console.log("after false " + isAneesTyping);
     }
   }, [messages]);
 
   return (
     <View style={{ flex: 1 }}>
       <GiftedChat
-        isTyping={true}
+        isTyping={isAneesTyping}
         messages={messages}
         showAvatarForEveryMessage={false}
         showUserAvatar={false}

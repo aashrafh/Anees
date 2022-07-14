@@ -38,7 +38,7 @@ def get_movie (text):
     return text.split('(')[0].lower().strip()
 def get_movies_content (text, tokens, tokens_verb_noun):
     movies_bag_of_words_eng = ['action','adventure','animation','children','comedy','crime','documentary','drama','fantasy','horror','musical','mystery','romance','sci-fi','war','western']
-    movies_bag_of_words_ar = ['اكشن','مغامره','انيميشن','اطفال','كوميدي','جريمه','وثايقي','دراما','خيال','رعب','موسيقي','غموض','رومانسي','علمي','حروب','ويستيرن']
+    movies_bag_of_words_ar = ['اكشن','مغامره','انيميشن','اطفال','كوميدي','جريمه','وثايقي','دراما','خيال','رعب','موسيقي','غموض','رومانسي','خيال','حروب','ويستيرن']
     categories = []
     movie = re.findall("[a-zA-Z]*", text) 
     movie = " ".join(movie)

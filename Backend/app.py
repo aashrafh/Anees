@@ -1,4 +1,3 @@
-
 from urllib import request
 from flask import Flask, request, abort, jsonify
 from flask_pymongo import PyMongo
@@ -12,7 +11,7 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 module_path = os.path.abspath(os.path.join(
-    'E:\Anees\Modules\Chatbot\src'))
+    'F:\coullage\Year 4\Anees\Modules\Chatbot\src'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 app = Flask(__name__)

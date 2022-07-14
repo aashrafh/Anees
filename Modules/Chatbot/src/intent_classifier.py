@@ -1,7 +1,7 @@
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
 
-labels = ['schedule','weather','general','recommendation','greeting','thank']
+labels = ['schedule','general','weather','recommendation','greeting','thank']
 max_length = 200
 
 def intent(text,m,tokenizer):
