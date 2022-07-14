@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import {
   StyleSheet,
   View,
@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import { api } from "../api";
 import AppButton from "../components/AppButton";
-// import * as SecureStore from "expo-secure-store";
+import * as SecureStore from "expo-secure-store";
+import { TokenContext } from "../../context";
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [token, setToken] = useContext(TokenContext);
 
   const handleUsername = (text) => {
     setUsername(text);
@@ -26,8 +28,8 @@ const Login = ({ navigation }) => {
       .post("/login", { username, password })
       .then(async (res) => {
         console.log(res.data);
-        // await SecureStore.setItemAsync("username", username);
-        navigation.navigate("Chat");
+        await SecureStore.setItemAsync("username", username);
+        setToken(username);
       })
       .catch((err) => {
         console.log(err.response);

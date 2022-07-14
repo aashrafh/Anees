@@ -1,14 +1,17 @@
-import React, { useEffect, useCallback, useState } from "react";
+import React, { useEffect, useCallback, useState, useContext } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
 import { api } from "../api";
+import * as SecureStore from "expo-secure-store";
+import { TokenContext } from "../../context";
 
 const aneesAvatar = require("../../assets/images/aneesAvatar.png");
 const userAvatar = require("../../assets/images/userAvatar.png");
 
-const Chat = () => {
+const Chat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
+  const [token, setToken] = useContext(TokenContext);
 
   const renderBubble = (props) => {
     const wrapperStyle = {
@@ -39,6 +42,28 @@ const Chat = () => {
     );
   }, []);
 
+  const onLogout = () => {
+    SecureStore.deleteItemAsync("username").then(() => {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: "استمتعت بالكلام معاك، اتمنى اشوفك تاني",
+            createdAt: new Date(),
+            user: {
+              _id: 0,
+              name: "أنيس",
+              avatar: aneesAvatar,
+            },
+          },
+        ])
+      );
+      setTimeout(() => {
+        setToken("");
+      }, 1000);
+    });
+  };
+
   useEffect(() => {
     api
       .post("/history", { username: "Ahmed" })
@@ -65,6 +90,11 @@ const Chat = () => {
 
   useEffect(() => {
     if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      if (messages[0].text === "سلام") {
+        onLogout();
+        return;
+      }
+
       setIsAneesTyping(true);
       console.log("after true " + isAneesTyping);
       api
