@@ -12,7 +12,7 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 module_path = os.path.abspath(os.path.join(
-    'F:\coullage\Year 4\Anees\Modules\Chatbot\src'))
+    'E:\Anees\Modules\Chatbot\src'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 app = Flask(__name__)
@@ -38,29 +38,27 @@ def get_response():
     print("Intent -> ", intent)
     print("Emotion ->", emotion)
     add_emotion(user, emotion)
-    isGeneral = 0
+
     if intent == 'general' or intent == 'greeting' or intent == 'thank':
-        messages = user['messages'][:10]
-        messages = [message for message in messages if message['isGeneral'] == 1]
+        messages = user['messages']
         if len(messages) > 4:
             messages = messages[:4]
         messages = messages[::-1]
-        messages = [{'message': message['message'],'isUser' : message['isUser']} for message in messages]
         response = requests.post(
-            'https://07ee-35-197-122-94.ngrok.io/msa', json={'utter': text, 'history': messages})
+            'http://6259-34-147-54-199.ngrok.io/arz', json={'utter': text, 'history': messages})
         response = response.json()
-        response['text'] = response['response']
-        isGeneral = 1
+        add_conversation(user, text, 1)
+        add_conversation(user, response['response'], 0)
 
     elif intent == 'recommendation-movies':
         response = movies_recommendation(user, response['movie'], response['categories'], "")
+        add_conversation(user, text, 1)
+        add_conversation(user, response['text'], 0)
 
     elif intent == 'recommendation-places':
         response = locations_recommendation(user, response['places'], "")
-
-    add_conversation(user, text, 1, isGeneral)
-    add_conversation(user, response['text'], 0, isGeneral)
-
+        add_conversation(user, text, 1)
+        add_conversation(user, response['text'], 0)
 
     return {'response': response, 'intent': intent}
 
@@ -219,10 +217,10 @@ def add_place(user, placeName, address, rating=2.5):
                                '$set': {'places': places}})
 
 
-def add_conversation(user, message, id, isGeneral):
+def add_conversation(user, message, id):
     username = user['username']
     messages = user['messages']
-    messageDB = {'isUser':id, 'message': message, 'time': datetime.now(), 'isGeneral' : isGeneral}
+    messageDB = {'isUser':id, 'message': message, 'time': datetime.now()}
     messages.insert(0, messageDB)
     usersCollection.update_one({'username': username}, {
                                '$set': {'messages': messages}})
@@ -249,6 +247,7 @@ def movies_recommendation(user, movie, categories, text):
     if movie == "" and len(categories) == 0:
         categories_liked_filtered = [
             category['name'] for category in categories_liked if category['rating'] >= 3]
+        print(categories_liked_filtered)
         if len(categories_liked_filtered) == 0:
             categories_liked = [category['name'] for category in categories_liked]
             categories , relevance = get_relevance(categories_liked)
@@ -269,9 +268,11 @@ def movies_recommendation(user, movie, categories, text):
     movies = list(movies["title"])
     user_movies = [movie['name'] for movie in user['movies']]
     movies_filtered = []
+    print(user_movies)
     for movie in movies:
         if movie not in user_movies:
             movies_filtered.append(movie)
+    print(movies_filtered)
     movies_filtered = movies_filtered[:2]
 
     for movie in movies_filtered:
