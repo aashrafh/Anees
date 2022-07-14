@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback, useState, useContext } from "react";
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
-import { View, KeyboardAvoidingView, Platform } from "react-native";
+import { GiftedChat, Bubble, MessageText } from "react-native-gifted-chat";
+import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import HtmlView from "react-native-htmlview";
 import { api } from "../api";
 import * as SecureStore from "expo-secure-store";
 import { TokenContext } from "../../context";
@@ -8,7 +9,7 @@ import { TokenContext } from "../../context";
 const aneesAvatar = require("../../assets/images/aneesAvatar.png");
 const userAvatar = require("../../assets/images/userAvatar.png");
 
-const Chat = ({ navigation }) => {
+const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
   const [token, setToken] = useContext(TokenContext);
@@ -34,6 +35,15 @@ const Chat = ({ navigation }) => {
         }}
       />
     );
+  };
+
+  const renderMessageText = (props) => {
+    const { currentMessage } = props;
+    const containsHtml = /<\/?[a-z][\s\S]*>/i.test(currentMessage.text);
+    if (containsHtml) {
+      return <HtmlView value={currentMessage.text} stylesheet={htmlMsg} />;
+    }
+    return <MessageText {...props} />;
   };
 
   const onSend = useCallback((messages = []) => {
@@ -69,7 +79,7 @@ const Chat = ({ navigation }) => {
       .post("/history", { username: "Ahmed" })
       .then((res) => {
         const history = res.data.response;
-        // console.log(history);
+
         setMessages(
           history.map((item, index) => ({
             _id: index,
@@ -103,21 +113,24 @@ const Chat = ({ navigation }) => {
           text: messages[0].text,
         })
         .then((res) => {
-          // console.log(res);
-          setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, [
-              {
-                _id: messages.length + 1,
-                text: res.data.response.text,
-                createdAt: new Date(),
-                user: {
-                  _id: 0,
-                  name: "أنيس",
-                  avatar: aneesAvatar,
+          if (res.data.response.intent === "search") {
+            console.log("Search", res.data.response);
+          } else {
+            setMessages((previousMessages) =>
+              GiftedChat.append(previousMessages, [
+                {
+                  _id: messages.length + 1,
+                  text: res.data.response.text,
+                  createdAt: new Date(),
+                  user: {
+                    _id: 0,
+                    name: "أنيس",
+                    avatar: aneesAvatar,
+                  },
                 },
-              },
-            ])
-          );
+              ])
+            );
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -143,10 +156,24 @@ const Chat = ({ navigation }) => {
           avatar: userAvatar,
         }}
         renderBubble={renderBubble}
+        renderMessageText={renderMessageText}
       />
       {Platform.OS === "android" && <KeyboardAvoidingView behavior="padding" />}
     </View>
   );
 };
+
+const htmlMsg = StyleSheet.create({
+  ul: {
+    padding: "5%",
+  },
+  ol: {
+    padding: "5%",
+  },
+  a: {
+    fontWeight: "300",
+    color: "#2B9BED", // make links coloured pink
+  },
+});
 
 export default Chat;
