@@ -50,7 +50,6 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    setIsAneesTyping(true);
     api
       .post("/history", { username: "Ahmed" })
       .then((res) => {
@@ -68,16 +67,16 @@ const Chat = () => {
             },
           }))
         );
-        setIsAneesTyping(false);
       })
       .catch((err) => {
-        setIsAneesTyping(false);
         console.log(err);
       });
   }, []);
 
   useEffect(() => {
     if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      setIsAneesTyping(true);
+      console.log("after true " + isAneesTyping);
       api
         .post("/getResponse", {
           username: "Ahmed",
@@ -103,13 +102,15 @@ const Chat = () => {
         .catch((err) => {
           console.log(err);
         });
+      setIsAneesTyping(false);
+      console.log("after false " + isAneesTyping);
     }
   }, [messages]);
 
   return (
     <View style={{ flex: 1 }}>
       <GiftedChat
-        isTyping={true}
+        isTyping={isAneesTyping}
         messages={messages}
         showAvatarForEveryMessage={false}
         showUserAvatar={false}
