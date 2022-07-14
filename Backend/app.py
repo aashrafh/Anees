@@ -12,7 +12,7 @@ import numpy as np
 warnings.filterwarnings("ignore")
 
 module_path = os.path.abspath(os.path.join(
-    '/home/aashrafh/Desktop/Anees/Modules/Chatbot/src'))
+    'E:\Anees\Modules\Chatbot\src'))
 if module_path not in sys.path:
     sys.path.append(module_path)
 app = Flask(__name__)

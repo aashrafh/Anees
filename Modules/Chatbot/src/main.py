@@ -112,7 +112,7 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
     match   intent:
         case 'weather':
             print("calling the weather module...")
-            response["message"] = weather.main(tokens,tokens_verb_noun,ents)
+            response["text"] = weather.main(tokens,tokens_verb_noun,ents)
 
         case "schedule":
             print("calling the schedule module...")
@@ -120,6 +120,7 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
             content = content_extract.get_schedule_content(text, tokens_used, filtered_tokens)
             response["edited_time"] = edited_time
             response["content"] = content
+            response['text'] = "انا حجزتلك معاد فالنتيجة\n\n" + "بعنوان : " + response["content"] + "\n\nوميعاد : " + response['edited_time'].strftime("%m/%d/%Y, %H:%M:%S") + "\n"
             
         case 'recommendation':
             print("calling the recommendation intent module...")
