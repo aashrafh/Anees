@@ -15,14 +15,14 @@ import { api } from "../api";
 //   },
 // },
 const Chat = () => {
-  const aneesAvatar = "https://placeimg.com/140/140/any";
+  const aneesAvatar = "../../UI/assets/images/Anees.png";
   const userAvatar = "https://placeimg.com/140/140/any";
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
 
   const renderBubble = (props) => {
     const wrapperStyle = {
-      padding: "0.5",
+      padding: 0.5,
     };
     const bottomContainerStyle = {
       display: "none",
