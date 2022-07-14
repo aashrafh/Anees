@@ -1,3 +1,6 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+from re import search
 import numpy as np
 from tensorflow import keras
 import pickle
@@ -15,6 +18,8 @@ import ner
 import preprocess
 import tokenization
 import os
+import q_not
+import search
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 
@@ -48,7 +53,14 @@ def get_models():
         filename = f'Sentimental_Analysis/models/tfidf_all_model.sav'
         tf_idf = pickle.load(open(filename, 'rb'))
         return model, tf_idf
-
+    
+    def get_Q_not_models():
+        filename = f'../utils/Q_not_model.sav'
+        model = pickle.load(open(filename, 'rb'))
+        filename = f'../utils/tfidf_Q_not_model.sav'
+        tf_idf = pickle.load(open(filename, 'rb'))
+        return model , tf_idf
+    
     def get_intent_models():
         m = keras.models.load_model("Intent_Classification/models")
         filename = f'../utils/tokenizer.sav'
@@ -80,7 +92,8 @@ def get_models():
     recomm_intent_model, recomm_tokenizer = get_recomm_intent_models()
     location_recomm = get_location_recomm_model()
     movie_recomm = get_movie_recomm_model()
-    return stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm
+    q_not_model , tf_idf_q_not = get_Q_not_models()
+    return stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm,q_not_model , tf_idf_q_not
 
 
 def NLU(text, stopwords, ner_instance, verbs, nouns):
@@ -98,7 +111,7 @@ def NLU(text, stopwords, ner_instance, verbs, nouns):
     return text, tokens, ents, tokens_verb_noun
 
 
-def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm):
+def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm,q_not_model , tf_idf_q_not):
     # Start of chat
     response = dict()
     text, tokens, ents, tokens_verb_noun = NLU(
@@ -110,6 +123,12 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
     # Tasks
     intent = intent_classifier.intent(preprocessed_text,intent_model,tokenizer)
     match   intent:
+        case 'general':
+            question = q_not.get_q_not(text,q_not_model,tf_idf_q_not)
+            if question == 'Q' and 'B-ORG' in ents.values():
+                intent = 'search'
+                response['search'] = search.search(text)
+            #elif 2ryb mn ab7as aw dwar
         case 'weather':
             print("calling the weather module...")
             response["text"] = weather.main(tokens,tokens_verb_noun,ents)
@@ -138,5 +157,5 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
                 response["places"] = preprocessed_text
     return intent, emotion, response
 
-# stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm = get_models()
-# print(main("اقترح فيلم كوميدى جديد لاشاهده",stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm))
+stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm,q_not_model , tf_idf_q_not = get_models()
+print(main("قطتى ماتت",stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm,q_not_model , tf_idf_q_not))
