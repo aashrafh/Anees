@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "https://6d5c-41-37-144-111.eu.ngrok.io";
 
 const headers = {
   Accept: `application/json`,
