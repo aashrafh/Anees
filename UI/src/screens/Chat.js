@@ -1,19 +1,8 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { GiftedChat, Bubble } from "react-native-gifted-chat";
 import { View, KeyboardAvoidingView, Platform } from "react-native";
-import axios from "axios";
 import { api } from "../api";
 
-// {
-//   _id: 1,
-//   text: "Hello 1",
-//   createdAt: new Date(),
-//   user: {
-//     _id: 2,
-//     name: "React Native",
-//     avatar: "https://placeimg.com/140/140/any",
-//   },
-// },
 const Chat = () => {
   const aneesAvatar = "../../UI/assets/images/Anees.png";
   const userAvatar = "https://placeimg.com/140/140/any";

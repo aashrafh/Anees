@@ -89,30 +89,27 @@ const styles = StyleSheet.create({
 
   actions: {
     width: "90%",
-    //border: "none",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    //gap: 5,
+    borderWidth: 0,
+    marginTop: "5%",
   },
 
   inputView: {
     padding: "2%",
+    margin: "2%",
+    alignItems: "center",
+    justifyContent: "center",
     color: "#fff",
     backgroundColor: "#64B5F4",
     borderRadius: 10,
-    width: "40%",
-    height: "25%",
-    alignItems: "center",
-    justifyContent: "center",
+    width: "80%",
   },
   form: {
     width: "90%",
-    //border: "none",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    //gap: 5,
+    borderWidth: 0,
   },
   TextInput: {
     height: 50,
@@ -144,8 +141,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#2B9BED",
     padding: "2%",
-    height: "10%",
-    width: "40%",
+    margin: "2%",
+    width: "90%",
   },
   Image: {
     resizeMode: "contain",
