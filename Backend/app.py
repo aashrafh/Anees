@@ -1,6 +1,6 @@
 
 from urllib import request
-from flask import Flask, request
+from flask import Flask, request, abort, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import warnings
@@ -31,7 +31,7 @@ def get_response():
     text = request.json['text']
     user = usersCollection.find_one({'username': username})
     if user == None:
-        return "there is no user with this username"
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
 
     intent, emotion, response = main.main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf,
                                           intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm)
@@ -72,7 +72,7 @@ def get_history():
     username = request.json['username']
     user = usersCollection.find_one({'username': username})
     if user == None:
-        return "there is no user with this username"
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
     history = user['messages']
     return {'response': history, 'intent': 'history'}
 
@@ -83,9 +83,9 @@ def login():
     password = request.json['password']
     user = usersCollection.find_one(
         {'username': username, 'password': password})
-    if user != None:
-        return "logged in successfully"
-    return "username or password in incorrect"
+    if user == None:
+        return jsonify(message= 'اسم المستخدم او كلمة السر غلط'), 403
+    return "the user logged in successfully"
 
 
 @app.route('/signup', methods=['POST'])
@@ -94,7 +94,7 @@ def sign_up():
     password = request.json['password']
     user = usersCollection.find_one({'username': username})
     if user != None:
-        return "the username is already used"
+        return jsonify(message="اسم المستخدم دة حد مستخدمه قبل كدة\nلو سمحت اختار اسم تانى"), 403
     # add all the categories with 0 rating
     all_categories = ['action', 'adventure', 'animation', 'children', 'comedy', 'crime', 'documentary',
                       'drama', 'fantasy', 'horror', 'musical', 'mystery', 'romance', 'sci-fi', 'war', 'western']
@@ -111,7 +111,7 @@ def get_most_frequent_emotion():
     username = request.json['username']
     user = usersCollection.find_one({'username': username})
     if user == None:
-        return "there is no user with this username"
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
     emotions = user['emotions']
     # get most frequent emotion using the last 5 messages
     if len(emotions) < 5:
@@ -140,7 +140,7 @@ def update_place_rating():
     rating = max(min(rating, 5), 0)
     user = usersCollection.find_one({'username': username})
     if user == None:
-        return "there is no user with this username"
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
     places = user['places']
     for place in places:
         if place['name'] == place_name:
@@ -159,7 +159,7 @@ def update_movie_rating():
     rating = max(min(rating, 5), 0)
     user = usersCollection.find_one({'username': username})
     if user == None:
-        return "there is no user with this username"
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
     movies = user['movies']
     flag = 0
     for movie in movies:
@@ -182,7 +182,7 @@ def update_category_rating():
     rating = max(min(rating, 5), 0)
     user = usersCollection.find_one({'username': username})
     if user == None:
-        return "there is no user with this username"
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
     movies_categories_liked = user['movies_categories_liked']
     for category in movies_categories_liked:
         if category['name'] == category_name:
@@ -230,12 +230,12 @@ def add_conversation(user, message, id, isGeneral):
 
 def send_recommendation(text, type, contents):
     if type == "movies":
-        text += "جبتلك فيلمين اهو ياريت يعجبوك\n\n"
+        text += "جبتلك فيلمين اهو اتمنى يعجبوك\n\n"
         text += contents[0] + "\n\n"
         text += contents[1] + "\n\n"
         text += "\nوكمان شوية هبعتلك رسالة تقولى رأيك فيهم لو كونت شوفتهم"
     else:
-        text += "جبتلك مكانين اهو ياريت يعجبوك\n\n"
+        text += "جبتلك مكانين اهو اتمنى يعجبوك\n\n"
         for content in contents:
             text += "الاسم : " + content['الاسم'] + "\n"
             text += "العنوان : " + content['العنوان'] + "\n\n"
