@@ -23,8 +23,8 @@ const Login = ({ navigation }) => {
         navigation.navigate("Chat");
       })
       .catch((err) => {
-        console.log(err);
-        Alert.alert("حصل مشكلة :(", "اليوزرنيم غلط", [
+        console.log(err.response);
+        Alert.alert("حصل مشكلة :(", err.response.data.message, [
           { text: "حاول تاني", onPress: () => console.log("OK Pressed") },
         ]);
       });
