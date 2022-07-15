@@ -22,7 +22,6 @@ def extract_time_location(tokens, tokens_verb_noun,ents):
                 location = ent
             break
     edited_time, _, _ = time_extract.main(tokens, tokens_verb_noun,'weather')
-    print(edited_time)
     now_time = datetime.now()
     if edited_time.month > now_time.month:
         return location , 10 , 10
@@ -31,7 +30,6 @@ def extract_time_location(tokens, tokens_verb_noun,ents):
     hour = edited_time.hour
     if edited_time.day > now_time.day:
         day = 0
-    print(location , day , hour)
     return location , day , hour
 
 def get_weather(city_name, day , hour):
