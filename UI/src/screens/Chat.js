@@ -225,6 +225,7 @@ const Chat = ({ navigation }) => {
           },
         ])
       );
+      setIsAneesTyping(false);
       setTimeout(() => {
         setToken("");
       }, 1000);
@@ -256,14 +257,12 @@ const Chat = ({ navigation }) => {
 
   useEffect(() => {
     if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      setIsAneesTyping(true);
       if (messages[0].text === "سلام") {
         onLogout();
         return;
       }
-
-      setIsAneesTyping(true);
-      console.log("after true " + isAneesTyping);
-
+      
       api
         .post("/getResponse", {
           username: token,
@@ -297,12 +296,13 @@ const Chat = ({ navigation }) => {
               },
             ])
           );
+
+          setIsAneesTyping(false);
         })
         .catch((err) => {
           console.log(err);
+          setIsAneesTyping(false);
         });
-      setIsAneesTyping(false);
-      console.log("after false " + isAneesTyping);
     }
   }, [messages]);
 
