@@ -23,6 +23,7 @@
     "expo-permissions": "^13.2.0",
     "expo-secure-store": "^11.2.0",
     "expo-status-bar": "~1.2.0",
+    "expo-updates": "^0.11.7",
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-native": "0.64.3",
@@ -39,6 +40,20 @@
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
+  },
+  "expo": {
+    "name": "انيس",
+    "icon": "./assets/images/aneesAvatar.png",
+    "version": "1.0.0",
+    "slug": "صديقك انيس",
+    "ios": {
+      "bundleIdentifier": "com.anees.anees",
+      "buildNumber": "1.0.0"
+    },
+    "android": {
+      "package": "com.anees.anees",
+      "versionCode": 1
+    }
   },
   "private": true
 }
