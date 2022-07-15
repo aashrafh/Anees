@@ -6,24 +6,55 @@ import {
   Send,
   Composer,
 } from "react-native-gifted-chat";
-import { View, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import HtmlView from "react-native-htmlview";
 import { api } from "../api";
 import * as SecureStore from "expo-secure-store";
 import { TokenContext } from "../../context";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
+import * as Calendar from "expo-calendar";
+
 const aneesAvatar = require("../../assets/images/aneesAvatar.png");
 const userAvatar = require("../../assets/images/userAvatar.png");
+
+const getDefaultCalendarSource = async () => {
+  const defaultCalendar = await Calendar.getDefaultCalendarAsync();
+  return defaultCalendar.source;
+};
+
+const createCalendar = async () => {
+  const defaultCalendarSource =
+    Platform.OS === "ios"
+      ? await getDefaultCalendarSource()
+      : { isLocalAccount: true, name: "Anees" };
+
+  const calendarID = await Calendar.createCalendarAsync({
+    title: "Anees",
+    color: "blue",
+    entityType: Calendar.EntityTypes.EVENT,
+    sourceId: defaultCalendarSource.id,
+    source: defaultCalendarSource,
+    name: "Anees",
+    ownerAccount: "personal",
+    accessLevel: Calendar.CalendarAccessLevel.OWNER,
+    timeZone: "Africa/Cairo",
+  });
+  console.log(calendarID);
+  return calendarID;
+};
 
 const Chat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
   const [token, setToken] = useContext(TokenContext);
 
+  const [calendarId, setCalendarId] = useState(null);
+
   const [notificationPermissions, setNotificationPermissions] = useState(
     PermissionStatus.UNDETERMINED
   );
+  const [calendarPermissions, setCalendarPermissions] = useState(false);
 
   const scheduleNotification = (seconds, items) => {
     const schedulingOptions = {
@@ -59,16 +90,78 @@ const Chat = ({ navigation }) => {
     return status;
   };
 
-  useEffect(() => {
-    requestNotificationPermissions();
-  }, []);
+  const requestCalendarPermissions = async () => {
+    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    if (status === "granted") {
+      const calendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT
+      );
+      const calendarId = await createCalendar();
+      setCalendarId(calendarId);
+      setCalendarPermissions(status);
+    }
+  };
 
-  useEffect(() => {
-    if (notificationPermissions !== PermissionStatus.GRANTED) return;
-    const listener =
-      Notifications.addNotificationReceivedListener(handleNotification);
-    return () => listener.remove();
-  }, [notificationPermissions]);
+  const addEventToCalendar = async (title, time, text) => {
+    const startDate = new Date(new Date(time).getTime() - 60000 * 120);
+    const endDate = new Date(new Date(time).getTime() - 60000 * 60);
+
+    const events = await Calendar.getEventsAsync(
+      [calendarId],
+      startDate,
+      endDate
+    );
+
+    if (events.length === 0) {
+      const eventIdInCalendar = await Calendar.createEventAsync(calendarId, {
+        title,
+        startDate,
+        endDate,
+      });
+
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: text,
+            createdAt: new Date(),
+            user: {
+              _id: 0,
+              name: "أنيس",
+              avatar: aneesAvatar,
+            },
+          },
+        ])
+      );
+    } else {
+      const text =
+        "مقدرتش اضيف المعاد للنتيجة لان عندك مواعيد تانية في نفس الفترة";
+      api
+        .put("/schedule_cancel", { username: token, text: text })
+        .then(() => {
+          console.log("canceled");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: text,
+            createdAt: new Date(),
+            user: {
+              _id: 0,
+              name: "أنيس",
+              avatar: aneesAvatar,
+            },
+          },
+        ])
+      );
+    }
+
+    setIsAneesTyping(false);
+  };
 
   const renderBubble = (props) => {
     const wrapperStyle = {
@@ -102,6 +195,14 @@ const Chat = ({ navigation }) => {
     return <MessageText {...props} />;
   };
 
+  const renderSend = (props) => {
+    return <Send {...props} label={"ابعت"} />;
+  };
+
+  const renderComposer = (props) => {
+    return <Composer {...props} placeholder={"بتفكر في ايه؟"} />;
+  };
+
   const onSend = useCallback((messages = []) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, messages)
@@ -124,11 +225,17 @@ const Chat = ({ navigation }) => {
           },
         ])
       );
+      setIsAneesTyping(false);
       setTimeout(() => {
         setToken("");
       }, 1000);
     });
   };
+
+  useEffect(() => {
+    requestNotificationPermissions();
+    requestCalendarPermissions();
+  }, []);
 
   useEffect(() => {
     api
@@ -154,14 +261,23 @@ const Chat = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
+    if (notificationPermissions !== PermissionStatus.GRANTED) return;
+    const listener =
+      Notifications.addNotificationReceivedListener(handleNotification);
+    return () => listener.remove();
+  }, [notificationPermissions]);
+
+  useEffect(() => {
+    if (calendarPermissions !== "granted" || calendarId === null) return;
+  }, [calendarPermissions]);
+
+  useEffect(() => {
     if (messages.length > 0 && messages[0]?.user?._id === 1) {
+      setIsAneesTyping(true);
       if (messages[0].text === "سلام") {
         onLogout();
         return;
       }
-
-      setIsAneesTyping(true);
-      console.log("after true " + isAneesTyping);
 
       api
         .post("/getResponse", {
@@ -170,8 +286,19 @@ const Chat = ({ navigation }) => {
         })
         .then((res) => {
           if (res.data.intent === "recommendation-movies") {
-            scheduleNotification(3, res.data.response.movies);
+            scheduleNotification(10, res.data.response.movies);
           }
+
+          if (res.data.intent === "schedule") {
+            addEventToCalendar(
+              res.data.response.content,
+              res.data.response.edited_time,
+              res.data.response.text
+            );
+
+            return;
+          }
+
           setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, [
               {
@@ -186,22 +313,15 @@ const Chat = ({ navigation }) => {
               },
             ])
           );
+
+          setIsAneesTyping(false);
         })
         .catch((err) => {
           console.log(err);
+          setIsAneesTyping(false);
         });
-      setIsAneesTyping(false);
-      console.log("after false " + isAneesTyping);
     }
   }, [messages]);
-
-  const renderSend = (props) => {
-    return <Send {...props} label={"ابعت"} />;
-  };
-
-  const renderComposer = (props) => {
-    return <Composer {...props} placeholder={"بتفكر في ايه؟"} />;
-  };
 
   return (
     <View style={{ flex: 1 }}>
