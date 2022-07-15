@@ -158,10 +158,10 @@ def get_time(tokens, task):
 
     time_specifiers_tokens = {
         "صبح" : [0, 7], "ليل" : [1, 8], "صباح" : [0, 7], "نهار" : [1, 12], "ظهر" : [1, 12], "عصر" : [1, 3], "مغرب" : [1, 6] ,
-        "عشاء" : [1, 8], "عشا" : [1, 8], "فجر" : [0, 3]
+        "عشاء" : [1, 8], "عشا" : [1, 8], "فجر" : [0, 3], "صباحا" : [0, 7]
     }
     for token in tokens:
-        if token == "بكره":
+        if token in ["بكره", "غدا"]:
             edits[2] = 1
             tokens_used[tokens.index(token)] = 1
         elif token in time_specifiers_tokens:
