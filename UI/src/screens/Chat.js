@@ -13,6 +13,9 @@ import * as SecureStore from "expo-secure-store";
 import { TokenContext } from "../../context";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
+import * as Calendar from "expo-calendar";
+import * as Permissions from "expo-permissions";
+
 const aneesAvatar = require("../../assets/images/aneesAvatar.png");
 const userAvatar = require("../../assets/images/userAvatar.png");
 
@@ -21,9 +24,12 @@ const Chat = ({ navigation }) => {
   const [isAneesTyping, setIsAneesTyping] = useState(false);
   const [token, setToken] = useContext(TokenContext);
 
+  const [calendarId, setCalendarId] = useState(null);
+
   const [notificationPermissions, setNotificationPermissions] = useState(
     PermissionStatus.UNDETERMINED
   );
+  const [calendarPermissions, setCalendarPermissions] = useState(false);
 
   const scheduleNotification = (seconds, items) => {
     const schedulingOptions = {
@@ -59,8 +65,99 @@ const Chat = ({ navigation }) => {
     return status;
   };
 
+  const requestCalendarPermissions = async () => {
+    const { status } = await Calendar.requestCalendarPermissionsAsync();
+    if (status === "granted") {
+      const calendars = await Calendar.getCalendarsAsync(
+        Calendar.EntityTypes.EVENT
+      );
+      setCalendarPermissions(status);
+    }
+  };
+
+  const getDefaultCalendarSource = async () => {
+    const defaultCalendar = await Calendar.getDefaultCalendarAsync();
+    return defaultCalendar.source;
+  };
+
+  const createCalendar = async () => {
+    const defaultCalendarSource =
+      Platform.OS === "ios"
+        ? await getDefaultCalendarSource()
+        : { isLocalAccount: true, name: "Anees" };
+
+    const calendarID = await Calendar.createCalendarAsync({
+      title: "Anees",
+      color: "blue",
+      entityType: Calendar.EntityTypes.EVENT,
+      sourceId: defaultCalendarSource.id,
+      source: defaultCalendarSource,
+      name: "Anees",
+      ownerAccount: "personal",
+      accessLevel: Calendar.CalendarAccessLevel.OWNER,
+      timeZone: "Africa/Cairo",
+    });
+    console.log(calendarID);
+    return calendarID;
+  };
+
+  const addEventToCalendar = async (title, time, text) => {
+    const startDate = new Date(new Date(time).getTime() - 60000 * 120);
+    const endDate = new Date(new Date(time).getTime() - 60000 * 60);
+
+    const events = await Calendar.getEventsAsync(
+      [calendarId],
+      startDate,
+      endDate
+    );
+
+    if (events.length === 0) {
+      const eventIdInCalendar = await Calendar.createEventAsync(calendarId, {
+        title,
+        startDate,
+        endDate,
+      });
+
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: text,
+            createdAt: new Date(),
+            user: {
+              _id: 0,
+              name: "أنيس",
+              avatar: aneesAvatar,
+            },
+          },
+        ])
+      );
+    } else {
+      setMessages((previousMessages) =>
+        GiftedChat.append(previousMessages, [
+          {
+            _id: messages.length + 1,
+            text: "مقدرتش اضيف المعاد للنتيجة لان عندك مواعيد تانية في نفس الفترة",
+            createdAt: new Date(),
+            user: {
+              _id: 0,
+              name: "أنيس",
+              avatar: aneesAvatar,
+            },
+          },
+        ])
+      );
+    }
+  };
+
   useEffect(() => {
     requestNotificationPermissions();
+    requestCalendarPermissions();
+
+    (async function () {
+      const calendarId = await createCalendar();
+      setCalendarId(calendarId);
+    })();
   }, []);
 
   useEffect(() => {
@@ -69,6 +166,10 @@ const Chat = ({ navigation }) => {
       Notifications.addNotificationReceivedListener(handleNotification);
     return () => listener.remove();
   }, [notificationPermissions]);
+
+  useEffect(() => {
+    if (calendarPermissions !== "granted" || calendarId === null) return;
+  }, [calendarPermissions]);
 
   const renderBubble = (props) => {
     const wrapperStyle = {
@@ -172,6 +273,16 @@ const Chat = ({ navigation }) => {
           if (res.data.intent === "recommendation-movies") {
             scheduleNotification(3, res.data.response.movies);
           }
+
+          if (res.data.intent === "schedule") {
+            addEventToCalendar(
+              res.data.response.content,
+              res.data.response.edited_time,
+              res.data.response.text
+            );
+            return;
+          }
+
           setMessages((previousMessages) =>
             GiftedChat.append(previousMessages, [
               {
