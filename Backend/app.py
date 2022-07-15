@@ -8,6 +8,7 @@ import os
 import requests
 from datetime import datetime
 import numpy as np
+import pandas as pd
 warnings.filterwarnings("ignore")
 
 module_path = os.path.abspath(os.path.join(
@@ -81,7 +82,7 @@ def login():
         {'username': username, 'password': password})
     if user == None:
         return jsonify(message= 'اسم المستخدم او كلمة السر غلط'), 403
-    return "the user logged in successfully"
+    return jsonify(message='the user logged in successfully'), 200
 
 
 @app.route('/signup', methods=['POST'])
@@ -93,14 +94,14 @@ def sign_up():
     if user != None:
         return jsonify(message="اسم المستخدم دة حد مستخدمه قبل كدة\nلو سمحت اختار اسم تانى"), 403
     # add all the categories with 0 rating
-    all_categories = ['action', 'adventure', 'animation', 'children', 'comedy', 'crime', 'documentary',
-                      'drama', 'fantasy', 'horror', 'musical', 'mystery', 'romance', 'sci-fi', 'war', 'western']
+    all_categories = ['Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary',
+                      'Drama', 'Fantasy', 'Horror', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'War', 'Western']
     movies_categories_liked = []
     for category in all_categories:
         movies_categories_liked.append({'name': category, 'rating': 0})
     usersCollection.insert_one({'username': username, 'password': password,
                                 'movies_categories_liked': movies_categories_liked, 'movies': [], 'places': [], 'emotions': ["joy"], 'messages': []})
-    return "the user is created successfully"
+    return jsonify(message='the user is created successfully'), 200
 
 
 @app.route('/emotions', methods=['GET'])
@@ -118,12 +119,12 @@ def get_most_frequent_emotion():
     response = {}
     intent = "None"
     if most_frequent_emotion == 'sadness':
-        intent = "recommendation-movies-auto"
+        intent = "recommendation-movies"
         response = movies_recommendation(user, "", np.array(
             [['comedy', 5], ['musical', 5]]), "من محادثاتك الاخيرة معايا حسيت انك حزين\n")
 
     elif most_frequent_emotion == 'anger':
-        intent = "recommendation-places-auto"
+        intent = "recommendation-places"
         response = locations_recommendation(
             user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n")
 
@@ -147,50 +148,33 @@ def update_place_rating():
             break
     usersCollection.update_one({'username': username}, {
         '$set': {'places': places}})
-    return "success"
+    return jsonify(message='success'), 200
 
 
 @app.route('/update_movie_rating', methods=['PUT'])
 def update_movie_rating():
     username = request.json['username']
     username = username.strip()
-    movie_name = request.json['movie_name']
-    rating = request.json['rating']
-    rating = max(min(rating, 5), 0)
+    movies_rated = request.json['movies']
     user = usersCollection.find_one({'username': username})
     if user == None:
-         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
-    movies = user['movies']
-    flag = 0
-    for movie in movies:
-        if movie['name'] == movie_name:
-            movie['rating'] = rating
-            flag = 1
-    if flag:
+        return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
+    for movie_rated in movies_rated:
+        movie_name = movie_rated['movie_name']
+        rating = movie_rated['rating']
+        rating = max(min(rating, 5), 0)
+        movies = user['movies']
+        genres = user['movies_categories_liked']
+        for movie in movies:
+            if movie['name'] == movie_name:
+                movie['rating'] = rating
+                movie_genres = movie['genres'].split('|')
+                for genre in genres:
+                    if genre['name'] in movie_genres:
+                        genre['rating'] = round( (rating + genre['rating']) / 2, 1)
         usersCollection.update_one({'username': username}, {
-                                   '$set': {'movies': movies}})
-    else:
-        add_movie(user, movie_name, rating)
-    return "success"
-
-
-@app.route('/update_category_rating', methods=['PUT'])
-def update_category_rating():
-    username = request.json['username']
-    username = username.strip()
-    category_name = request.json['category_name']
-    rating = request.json['rating']
-    rating = max(min(rating, 5), 0)
-    user = usersCollection.find_one({'username': username})
-    if user == None:
-         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
-    movies_categories_liked = user['movies_categories_liked']
-    for category in movies_categories_liked:
-        if category['name'] == category_name:
-            category['rating'] = rating
-    usersCollection.update_one({'username': username}, {
-                               '$set': {'movies_categories_liked': movies_categories_liked}})
-    return "success"
+                                '$set': {'movies': movies, 'movies_categories_liked' : genres}})
+    return jsonify(message='success'), 200
 
 
 def add_emotion(user, emotion):
@@ -201,10 +185,10 @@ def add_emotion(user, emotion):
                                '$set': {'emotions': emotions}})
 
 
-def add_movie(user, movieName, rating=2.5):
+def add_movie(user, movieName, genres, rating=2.5):
     username = user['username']
     movies = user['movies']
-    movie = {'name': movieName, 'rating': rating}
+    movie = {'name': movieName, 'rating': rating, 'genres': genres}
     movies.insert(0, movie)
     usersCollection.update_one({'username': username}, {
                                '$set': {'movies': movies}})
@@ -250,7 +234,6 @@ def movies_recommendation(user, movie, categories, text):
     if movie == "" and len(categories) == 0:
         categories_liked_filtered = [
             category['name'] for category in categories_liked if category['rating'] >= 3]
-        print(categories_liked_filtered)
         if len(categories_liked_filtered) == 0:
             categories_liked = [category['name'] for category in categories_liked]
             categories , relevance = get_relevance(categories_liked)
@@ -268,20 +251,21 @@ def movies_recommendation(user, movie, categories, text):
         categories , relevance = get_relevance(categories[:,0])
         movies = movie_recomm.recommend_given_categories(categories , relevance, top_k = 50)
 
+    genres = list(movies["genres"])
     movies = list(movies["title"])
     user_movies = [movie['name'] for movie in user['movies']]
     movies_filtered = []
-    print(user_movies)
-    for movie in movies:
+    genres_filtered = []
+    for index, movie in enumerate(movies):
         if movie not in user_movies:
             movies_filtered.append(movie)
-    print(movies_filtered)
+            genres_filtered.append(genres[index])
     movies_filtered = movies_filtered[:2]
 
-    for movie in movies_filtered:
-        add_movie(user, movie)
+    for index, movie in enumerate(movies_filtered):
+        add_movie(user, movie,genres_filtered[index])
     text = send_recommendation(text, "movies", movies_filtered)
-    response = {'text': text}
+    response = {'text': text, 'movies': movies_filtered}
     return response
 
 
