@@ -1,18 +1,74 @@
 import React, { useEffect, useCallback, useState, useContext } from "react";
-import { GiftedChat, Bubble, MessageText } from "react-native-gifted-chat";
-import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import {
+  GiftedChat,
+  Bubble,
+  MessageText,
+  Send,
+  Composer,
+} from "react-native-gifted-chat";
+import { View, StyleSheet, Alert, TouchableOpacity, Image } from "react-native";
 import HtmlView from "react-native-htmlview";
 import { api } from "../api";
 import * as SecureStore from "expo-secure-store";
 import { TokenContext } from "../../context";
-
+import { PermissionStatus } from "expo-modules-core";
+import * as Notifications from "expo-notifications";
 const aneesAvatar = require("../../assets/images/aneesAvatar.png");
 const userAvatar = require("../../assets/images/userAvatar.png");
 
-const Chat = () => {
+const Chat = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [isAneesTyping, setIsAneesTyping] = useState(false);
   const [token, setToken] = useContext(TokenContext);
+
+  const [notificationPermissions, setNotificationPermissions] = useState(
+    PermissionStatus.UNDETERMINED
+  );
+
+  const scheduleNotification = (seconds, items) => {
+    const schedulingOptions = {
+      content: {
+        title: "تحب تقييم الافلام؟",
+        body: "اضغط هنا لتقييم الافلام",
+        sound: true,
+        data: { items },
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+        color: "blue",
+      },
+      trigger: {
+        seconds: seconds,
+      },
+    };
+    Notifications.scheduleNotificationAsync(schedulingOptions);
+  };
+
+  const handleNotification = (notification) => {
+    const { data } = notification.request.content;
+    Alert.alert("", "تحب تقيم الافلام اللي اقترحتها عليك؟", [
+      { text: "لا", onPress: () => console.log("OK Pressed") },
+      {
+        text: "ماشي",
+        onPress: () => navigation.navigate("Rating", { items: data.items }),
+      },
+    ]);
+  };
+
+  const requestNotificationPermissions = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    setNotificationPermissions(status);
+    return status;
+  };
+
+  useEffect(() => {
+    requestNotificationPermissions();
+  }, []);
+
+  useEffect(() => {
+    if (notificationPermissions !== PermissionStatus.GRANTED) return;
+    const listener =
+      Notifications.addNotificationReceivedListener(handleNotification);
+    return () => listener.remove();
+  }, [notificationPermissions]);
 
   const renderBubble = (props) => {
     const wrapperStyle = {
@@ -76,10 +132,9 @@ const Chat = () => {
 
   useEffect(() => {
     api
-      .post("/history", { username: "Ahmed" })
+      .post("/history", { username: token })
       .then((res) => {
         const history = res.data.response;
-
         setMessages(
           history.map((item, index) => ({
             _id: index,
@@ -107,30 +162,30 @@ const Chat = () => {
 
       setIsAneesTyping(true);
       console.log("after true " + isAneesTyping);
+
       api
         .post("/getResponse", {
-          username: "Ahmed",
+          username: token,
           text: messages[0].text,
         })
         .then((res) => {
-          if (res.data.response.intent === "search") {
-            console.log("Search", res.data.response);
-          } else {
-            setMessages((previousMessages) =>
-              GiftedChat.append(previousMessages, [
-                {
-                  _id: messages.length + 1,
-                  text: res.data.response.text,
-                  createdAt: new Date(),
-                  user: {
-                    _id: 0,
-                    name: "أنيس",
-                    avatar: aneesAvatar,
-                  },
-                },
-              ])
-            );
+          if (res.data.intent === "recommendation-movies") {
+            scheduleNotification(3, res.data.response.movies);
           }
+          setMessages((previousMessages) =>
+            GiftedChat.append(previousMessages, [
+              {
+                _id: messages.length + 1,
+                text: res.data.response.text,
+                createdAt: new Date(),
+                user: {
+                  _id: 0,
+                  name: "أنيس",
+                  avatar: aneesAvatar,
+                },
+              },
+            ])
+          );
         })
         .catch((err) => {
           console.log(err);
@@ -139,6 +194,14 @@ const Chat = () => {
       console.log("after false " + isAneesTyping);
     }
   }, [messages]);
+
+  const renderSend = (props) => {
+    return <Send {...props} label={"ابعت"} />;
+  };
+
+  const renderComposer = (props) => {
+    return <Composer {...props} placeholder={"بتفكر في ايه؟"} />;
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -157,8 +220,9 @@ const Chat = () => {
         }}
         renderBubble={renderBubble}
         renderMessageText={renderMessageText}
+        renderSend={renderSend}
+        renderComposer={renderComposer}
       />
-      {Platform.OS === "android" && <KeyboardAvoidingView behavior="padding" />}
     </View>
   );
 };
@@ -172,7 +236,7 @@ const htmlMsg = StyleSheet.create({
   },
   a: {
     fontWeight: "300",
-    color: "#2B9BED", // make links coloured pink
+    color: "#2B9BED",
   },
 });
 
