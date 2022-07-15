@@ -28,10 +28,10 @@ const Chat = ({ navigation }) => {
   const scheduleNotification = (seconds, items) => {
     const schedulingOptions = {
       content: {
-        title: "This is a notification",
-        body: "This is the body",
-        itmes: items,
+        title: "تحب تقييم الافلام؟",
+        body: "اضغط هنا لتقييم الافلام",
         sound: true,
+        data: { items },
         priority: Notifications.AndroidNotificationPriority.HIGH,
         color: "blue",
       },
@@ -43,11 +43,13 @@ const Chat = ({ navigation }) => {
   };
 
   const handleNotification = (notification) => {
-    const { items } = notification.request.content;
-    console.log(items);
+    const { data } = notification.request.content;
     Alert.alert("", "تحب تقيم الافلام اللي اقترحتها عليك؟", [
       { text: "لا", onPress: () => console.log("OK Pressed") },
-      { text: "ماشي", onPress: () => navigation.navigate("Rating") },
+      {
+        text: "ماشي",
+        onPress: () => navigation.navigate("Rating", { items: data.items }),
+      },
     ]);
   };
 
@@ -130,10 +132,9 @@ const Chat = ({ navigation }) => {
 
   useEffect(() => {
     api
-      .post("/history", { username: "Ahmed" })
+      .post("/history", { username: token })
       .then((res) => {
         const history = res.data.response;
-
         setMessages(
           history.map((item, index) => ({
             _id: index,
@@ -164,7 +165,7 @@ const Chat = ({ navigation }) => {
 
       api
         .post("/getResponse", {
-          username: "Ahmed",
+          username: token,
           text: messages[0].text,
         })
         .then((res) => {
