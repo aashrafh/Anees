@@ -1,4 +1,5 @@
 from googleapiclient.discovery import build
+from functools import reduce
 my_api_key = "AIzaSyDKR0mQtI6fh1bmcaMcdkWqGv0UuoZ7_uA"
 my_cse_id = "32ccd6e123a6d49d7"
 
@@ -11,10 +12,15 @@ def search(text):
     result = google_search(text, my_api_key, my_cse_id)
     return get_results(result)
 
+def parse_search_results(msg, item):
+    return msg + f'\n\n<li><a href="{item[1]}">{item[0]}</a></li>'
+
 def get_results(result):
     results = list()
 
     for item in result['items'][:5]:
         results.append([item['title'],item['link']])
 
-    return results
+    msg = '<ul>دي افضل نتايج لقيتها، اتمنى تفيدك:'
+    msg = reduce(parse_search_results, results, msg) + "</ul>"
+    return msg

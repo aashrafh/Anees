@@ -1,6 +1,7 @@
 from time_extract import edit_distance, get_closest_word_with_threshold
 import re
 import pandas as pd
+import numpy as np
 def get_closest_word (word, tokens):
     min_dist = 10000
     min_index = 0
@@ -59,10 +60,13 @@ def get_movies_content (text, tokens, tokens_verb_noun):
                 categories.append([movies_bag_of_words_eng[index], 1 - distance])
     return movie, categories
 #-------------------------------------------------------------------------------------
-def get_places_content ():
-    place = ""
-    categories = [] 
-    return place, categories
+def get_search (tokens_verb_noun):
+    search_bag_of_words_ar = ['دور',"بحث","جيب","هات"]
+    tokens_verb_noun = np.array(tokens_verb_noun)
+    for word in tokens_verb_noun[:,0]:
+        if word in search_bag_of_words_ar:
+            return 1
+    return 0
 
 
 

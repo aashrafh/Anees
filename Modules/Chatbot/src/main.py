@@ -110,8 +110,17 @@ def NLU(text, stopwords, ner_instance, verbs, nouns):
     tokens_verb_noun = stemming.stem(tokens_verb_noun)
     return text, tokens, ents, tokens_verb_noun
 
+def search_module(text, q_not_model, tf_idf_q_not, ents, tokens_verb_noun):
+    response = dict()
+    intent = "general"
+    question = q_not.get_q_not(text,q_not_model,tf_idf_q_not)
+    if (question == 'Q' and 'B-ORG' in ents.values() ) or content_extract.get_search(tokens_verb_noun) == 1:
+        intent = 'search'
+        response['text'] = search.search(text)
+    return response, intent
 
-def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm,q_not_model , tf_idf_q_not):
+
+def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, q_not_model, tf_idf_q_not):
     # Start of chat
     response = dict()
     text, tokens, ents, tokens_verb_noun = NLU(
@@ -124,11 +133,7 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
     intent = intent_classifier.intent(preprocessed_text,intent_model,tokenizer)
     match   intent:
         case 'general':
-            question = q_not.get_q_not(text,q_not_model,tf_idf_q_not)
-            if question == 'Q' and 'B-ORG' in ents.values():
-                intent = 'search'
-                response['search'] = search.search(text)
-            #elif 2ryb mn ab7as aw dwar
+            response , intent = search_module(text, q_not_model, tf_idf_q_not, ents, tokens_verb_noun)
         case 'weather':
             print("calling the weather module...")
             response["text"] = weather.main(tokens,tokens_verb_noun,ents)
@@ -149,13 +154,15 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
                 intent = "recommendation-movies"
                 movie, categories = content_extract.get_movies_content(text, tokens, tokens_verb_noun)
                 categories = np.array(categories)
-                response["movie"] = movie
-                response["categories"] = categories
-
+                if movie == "" and len(categories) == 0:
+                    response, intent = search_module(text, q_not_model, tf_idf_q_not, ents, tokens_verb_noun)
+                else :
+                    response["movie"] = movie
+                    response["categories"] = categories
             else :
                 intent = "recommendation-places"
                 response["places"] = preprocessed_text
     return intent, emotion, response
 
-stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm,q_not_model , tf_idf_q_not = get_models()
-print(main("قطتى ماتت",stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,location_recomm,movie_recomm,q_not_model , tf_idf_q_not))
+#stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm,q_not_model , tf_idf_q_not = get_models()
+#print(main("من قام ب انشاء الاهلى ؟",stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer,recomm_intent_model,recomm_tokenizer,q_not_model , tf_idf_q_not))
