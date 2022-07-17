@@ -242,6 +242,37 @@ const Chat = ({ navigation }) => {
     });
   };
 
+  const handleResponse = (res) => {
+    if (res.data.intent === "recommendation-movies") {
+      scheduleNotification(10, res.data.response.movies);
+    }
+
+    if (res.data.intent === "schedule") {
+      addEventToCalendar(
+        res.data.response.content,
+        res.data.response.edited_time,
+        res.data.response.text
+      );
+
+      return;
+    }
+
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, [
+        {
+          _id: messages.length + 1,
+          text: res.data.response.text,
+          createdAt: new Date(),
+          user: {
+            _id: 0,
+            name: "أنيس",
+            avatar: aneesAvatar,
+          },
+        },
+      ])
+    );
+  };
+
   useEffect(() => {
     requestLocationPermissions();
     requestNotificationPermissions();
@@ -309,35 +340,26 @@ const Chat = ({ navigation }) => {
           },
         })
         .then((res) => {
-          if (res.data.intent === "recommendation-movies") {
-            scheduleNotification(10, res.data.response.movies);
-          }
+          handleResponse(res);
+          setIsAneesTyping(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsAneesTyping(false);
+        });
+    }
+  }, [messages]);
 
-          if (res.data.intent === "schedule") {
-            addEventToCalendar(
-              res.data.response.content,
-              res.data.response.edited_time,
-              res.data.response.text
-            );
-
-            return;
-          }
-
-          setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, [
-              {
-                _id: messages.length + 1,
-                text: res.data.response.text,
-                createdAt: new Date(),
-                user: {
-                  _id: 0,
-                  name: "أنيس",
-                  avatar: aneesAvatar,
-                },
-              },
-            ])
-          );
-
+  useEffect(() => {
+    if (messages.length > 0 && messages.length % 6 === 0) {
+      setIsAneesTyping(true);
+      api
+        .post("/emotions", {
+          username: token,
+        })
+        .then((res) => {
+          console.log(res);
+          handleResponse(res);
           setIsAneesTyping(false);
         })
         .catch((err) => {
