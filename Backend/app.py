@@ -41,13 +41,15 @@ def get_response():
 
     if intent == 'general':
         messages = user['messages']
+        messages = [{"message": message['message'], 'isUser':message['isUser'] } for message in messages if message['isGeneral'] == 1]
         if len(messages) > 4:
             messages = messages[:4]
         messages = messages[::-1]
         response = requests.post(
-            'http://6259-34-147-54-199.ngrok.io/arz', json={'utter': text, 'history': messages})
+            'https://4f6d-35-237-130-184.ngrok.io/arz', json={'utter': text, 'history': messages})
         response = response.json()
         response['text'] = response['response']
+        
 
     elif intent == 'recommendation-movies':
         response = movies_recommendation(user, response['movie'], response['categories'], "")
@@ -55,11 +57,23 @@ def get_response():
     elif intent == 'recommendation-places':
         response = locations_recommendation(user, response['places'], "")
 
-    add_conversation(user, text, 1)
-    add_conversation(user, response['text'], 0)
+    add_conversation(user, text, 1, intent)
+    add_conversation(user, response['text'], 0, intent)
     return {'response': response, 'intent': intent}
 
 # intents ->  recommendation-movies, recommendation-places, schedule, weather, general, *search*, None
+
+@app.route('/schedule_cancel', methods=['PUT'])
+def schedule_cancel():
+    username = request.json['username']
+    username = username.strip()
+    user = usersCollection.find_one({'username': username})
+    if user == None:
+         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
+    text = request.json['text']
+    add_conversation(user, text, 0, "schedule", 1)
+    return jsonify(message='success'), 200
+
 
 
 @app.route('/history', methods=['POST'])
@@ -121,7 +135,7 @@ def get_most_frequent_emotion():
     if most_frequent_emotion == 'sadness':
         intent = "recommendation-movies"
         response = movies_recommendation(user, "", np.array(
-            [['comedy', 5], ['musical', 5]]), "من محادثاتك الاخيرة معايا حسيت انك حزين\n")
+            [['comedy', 1], ['musical', 1]]), "من محادثاتك الاخيرة معايا حسيت انك حزين\n")
 
     elif most_frequent_emotion == 'anger':
         intent = "recommendation-places"
@@ -129,27 +143,6 @@ def get_most_frequent_emotion():
             user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n")
 
     return {'response': response, 'intent': intent}
-
-
-@app.route('/update_place_rating', methods=['PUT'])
-def update_place_rating():
-    username = request.json['username']
-    username = username.strip()
-    place_name = request.json['place_name']
-    rating = request.json['rating']
-    rating = max(min(rating, 5), 0)
-    user = usersCollection.find_one({'username': username})
-    if user == None:
-         return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
-    places = user['places']
-    for place in places:
-        if place['name'] == place_name:
-            place['rating'] = rating
-            break
-    usersCollection.update_one({'username': username}, {
-        '$set': {'places': places}})
-    return jsonify(message='success'), 200
-
 
 @app.route('/update_movie_rating', methods=['PUT'])
 def update_movie_rating():
@@ -204,10 +197,13 @@ def add_place(user, placeName, address, rating=2.5):
                                '$set': {'places': places}})
 
 
-def add_conversation(user, message, id):
+def add_conversation(user, message, id, intent, removeFirst = 0):
+        
     username = user['username']
     messages = user['messages']
-    messageDB = {'isUser':id, 'message': message, 'time': datetime.now()}
+    if removeFirst:
+        messages.pop(0)
+    messageDB = {'isUser':id, 'message': message, 'time': datetime.now(), 'isGeneral' : (1 if intent == "general" else 0)}
     messages.insert(0, messageDB)
     usersCollection.update_one({'username': username}, {
                                '$set': {'messages': messages}})
@@ -224,7 +220,6 @@ def send_recommendation(text, type, contents):
         for content in contents:
             text += "الاسم : " + content['الاسم'] + "\n"
             text += "العنوان : " + content['العنوان'] + "\n\n"
-        text += "\nوكمان شوية هبعتلك رسالة تقولى رأيك فيهم لو كونت زرتهم"
     return text
 
 
@@ -281,7 +276,7 @@ def locations_recommendation(user, preprocessed_text, text):
     print("calling the locations module...")
     location_data = location_recomm.search_by_text(preprocessed_text)
     locations = list()
-    for loc in location_data[:3]:
+    for loc in location_data[:2]:
         locations.append(
             {"الاسم": loc["name"], "تقييم المكان ": loc["rating"], "العنوان": loc["formatted_address"]})
     for loc in locations:

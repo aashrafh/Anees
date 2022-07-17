@@ -12,6 +12,6 @@ def intent(text,m,tokenizer):
         label = labels[np.argmax(pred)-1] 
     except:
         label = 'general'
-    if label in ['thanks' , 'greeting']:
+    if label in ['thank' , 'greeting']:
         label = 'general'
     return label
