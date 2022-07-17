@@ -14,6 +14,7 @@ import { TokenContext } from "../../context";
 import { PermissionStatus } from "expo-modules-core";
 import * as Notifications from "expo-notifications";
 import * as Calendar from "expo-calendar";
+import * as Location from "expo-location";
 
 const aneesAvatar = require("../../assets/images/aneesAvatar.png");
 const userAvatar = require("../../assets/images/userAvatar.png");
@@ -55,6 +56,7 @@ const Chat = ({ navigation }) => {
     PermissionStatus.UNDETERMINED
   );
   const [calendarPermissions, setCalendarPermissions] = useState(false);
+  const [location, setLocation] = useState(null);
 
   const scheduleNotification = (seconds, items) => {
     const schedulingOptions = {
@@ -100,6 +102,14 @@ const Chat = ({ navigation }) => {
       setCalendarId(calendarId);
       setCalendarPermissions(status);
     }
+  };
+
+  const requestLocationPermissions = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") return;
+
+    const location = await Location.getCurrentPositionAsync({});
+    setLocation(location);
   };
 
   const addEventToCalendar = async (title, time, text) => {
@@ -232,10 +242,51 @@ const Chat = ({ navigation }) => {
     });
   };
 
+  const handleResponse = (res) => {
+    if (res.data.intent === "recommendation-movies") {
+      scheduleNotification(10, res.data.response.movies);
+    }
+
+    if (res.data.intent === "schedule") {
+      addEventToCalendar(
+        res.data.response.content,
+        res.data.response.edited_time,
+        res.data.response.text
+      );
+
+      return;
+    }
+
+    setMessages((previousMessages) =>
+      GiftedChat.append(previousMessages, [
+        {
+          _id: messages.length + 1,
+          text: res.data.response.text,
+          createdAt: new Date(),
+          user: {
+            _id: 0,
+            name: "أنيس",
+            avatar: aneesAvatar,
+          },
+        },
+      ])
+    );
+  };
+
   useEffect(() => {
+    requestLocationPermissions();
     requestNotificationPermissions();
     requestCalendarPermissions();
   }, []);
+
+  useEffect(() => {
+    if (location)
+      console.log(
+        location,
+        location["coords"]["latitude"],
+        location["coords"]["longitude"]
+      );
+  }, [location]);
 
   useEffect(() => {
     api
@@ -283,37 +334,32 @@ const Chat = ({ navigation }) => {
         .post("/getResponse", {
           username: token,
           text: messages[0].text,
+          location: {
+            longitude: location?.coords?.longitude,
+            latitude: location?.coords?.latitude,
+          },
         })
         .then((res) => {
-          if (res.data.intent === "recommendation-movies") {
-            scheduleNotification(10, res.data.response.movies);
-          }
+          handleResponse(res);
+          setIsAneesTyping(false);
+        })
+        .catch((err) => {
+          console.log(err);
+          setIsAneesTyping(false);
+        });
+    }
+  }, [messages]);
 
-          if (res.data.intent === "schedule") {
-            addEventToCalendar(
-              res.data.response.content,
-              res.data.response.edited_time,
-              res.data.response.text
-            );
-
-            return;
-          }
-
-          setMessages((previousMessages) =>
-            GiftedChat.append(previousMessages, [
-              {
-                _id: messages.length + 1,
-                text: res.data.response.text,
-                createdAt: new Date(),
-                user: {
-                  _id: 0,
-                  name: "أنيس",
-                  avatar: aneesAvatar,
-                },
-              },
-            ])
-          );
-
+  useEffect(() => {
+    if (messages.length > 0 && messages.length % 6 === 0) {
+      setIsAneesTyping(true);
+      api
+        .post("/emotions", {
+          username: token,
+        })
+        .then((res) => {
+          console.log(res);
+          handleResponse(res);
           setIsAneesTyping(false);
         })
         .catch((err) => {
