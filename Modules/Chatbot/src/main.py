@@ -120,7 +120,7 @@ def search_module(text, q_not_model, tf_idf_q_not, ents, tokens_verb_noun):
     return response, intent
 
 
-def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, q_not_model, tf_idf_q_not):
+def main(text, location, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, q_not_model, tf_idf_q_not):
     # Start of chat
     response = dict()
     text, tokens, ents, tokens_verb_noun = NLU(
@@ -136,7 +136,7 @@ def main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_t
             response , intent = search_module(text, q_not_model, tf_idf_q_not, ents, tokens_verb_noun)
         case 'weather':
             print("calling the weather module...")
-            response["text"] = weather.main(tokens,tokens_verb_noun,ents)
+            response["text"] = weather.main(tokens, tokens_verb_noun, ents, location)
 
         case "schedule":
             print("calling the schedule module...")

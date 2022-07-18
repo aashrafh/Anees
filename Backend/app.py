@@ -30,15 +30,13 @@ def get_response():
     username = request.json['username']
     username = username.strip()
     text = request.json['text']
+    location = request.json['location']
     user = usersCollection.find_one({'username': username})
     if user == None:
          return jsonify(message='اسم المستخدم دة مش موجود !!'), 403
-
-    intent, emotion, response = main.main(text, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, q_not_model, tf_idf_q_not)
+    intent, emotion, response = main.main(text, location, stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, q_not_model, tf_idf_q_not)
     print("Intent -> ", intent)
     print("Emotion ->", emotion)
-    add_emotion(user, emotion)
-
     if intent == 'general':
         messages = user['messages']
         messages = [{"message": message['message'], 'isUser':message['isUser'] } for message in messages if message['isGeneral'] == 1]
@@ -55,8 +53,10 @@ def get_response():
         response = movies_recommendation(user, response['movie'], response['categories'], "")
 
     elif intent == 'recommendation-places':
-        response = locations_recommendation(user, response['places'], "")
+        response = locations_recommendation(user, response['places'], "", location)
 
+    add_emotion(user, emotion)
+    add_location(user, location)
     add_conversation(user, text, 1, intent)
     add_conversation(user, response['text'], 0, intent)
     return {'response': response, 'intent': intent}
@@ -114,11 +114,11 @@ def sign_up():
     for category in all_categories:
         movies_categories_liked.append({'name': category, 'rating': 0})
     usersCollection.insert_one({'username': username, 'password': password,
-                                'movies_categories_liked': movies_categories_liked, 'movies': [], 'places': [], 'emotions': ["joy"], 'messages': []})
+                                'movies_categories_liked': movies_categories_liked, 'movies': [], 'places': [], 'emotions': ["joy"], 'messages': [], 'locations' : []})
     return jsonify(message='the user is created successfully'), 200
 
 
-@app.route('/emotions', methods=['GET'])
+@app.route('/emotions', methods=['POST'])
 def get_most_frequent_emotion():
     username = request.json['username']
     username = username.strip()
@@ -139,8 +139,11 @@ def get_most_frequent_emotion():
 
     elif most_frequent_emotion == 'anger':
         intent = "recommendation-places"
+        locations = user['locations']
+        location = {'longitude':locations[0]['longitude'], 'latitude':locations[0]['latitude']}
+        print(location)
         response = locations_recommendation(
-            user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n")
+            user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n", location)
 
     return {'response': response, 'intent': intent}
 
@@ -191,11 +194,32 @@ def add_place(user, placeName, address, rating=2.5):
     username = user['username']
     places = user['places']
     place = {'name': placeName, 'rating': rating,
-             'address': address, 'duration': 0}
+             'address': address}
     places.insert(0, place)
     usersCollection.update_one({'username': username}, {
                                '$set': {'places': places}})
 
+def add_location(user, location):
+    username = user['username']
+    locations = user['locations']
+    edit = 0
+    for user_location in locations:
+        if calculate_distance(user_location['longitude'], user_location['latitude'], location['longitude'], location['latitude']) <= 1:
+            user_location['numberOfVisits'] += 1
+            edit = 1
+    if edit == 0:
+        locationDB = {'longitude': location['longitude'], 'latitude': location['latitude'],
+                'numberOfVisits': 0}
+        locations.insert(0, locationDB)
+    usersCollection.update_one({'username': username}, {
+                               '$set': {'locations': locations}})
+
+def calculate_distance (lon1, lat1, lon2, lat2):
+    R = 6371
+    x = (lon2-lon1) * np.cos((lat1+lat2)/2)
+    y = (lat2-lat1)
+    d = np.sqrt(x*x + y*y) * R
+    return d
 
 def add_conversation(user, message, id, intent, removeFirst = 0):
         
@@ -272,13 +296,14 @@ def get_relevance(categories):
     return categories[:3], [0.5, 0.5, 0.5]
 
 
-def locations_recommendation(user, preprocessed_text, text):
+def locations_recommendation(user, preprocessed_text, text, location):
     print("calling the locations module...")
-    location_data = location_recomm.search_by_text(preprocessed_text)
+    location_tuple = (location['latitude'], location['longitude'])
+    location_data = location_recomm.recommend(location_tuple ,keyword=preprocessed_text)
     locations = list()
     for loc in location_data[:2]:
         locations.append(
-            {"الاسم": loc["name"], "تقييم المكان ": loc["rating"], "العنوان": loc["formatted_address"]})
+            {"الاسم": loc["name"], "تقييم المكان ": loc["rating"], "العنوان": loc["vicinity"]})
     for loc in locations:
         place = loc['الاسم']
         address = loc['العنوان']

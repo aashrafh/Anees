@@ -11,8 +11,7 @@ from dateutil.relativedelta import relativedelta
 def extract_time_location(tokens, tokens_verb_noun,ents):
     cities = pd.read_csv('Task_data/weather_cities.csv',encoding='utf-8')
     #if the text not a question then we have to generate a text if we agree or not
-    #defaults
-    location = "Cairo"#the location of GPS
+    location = None
     #extract features from text -> location & Time
     for ent,value in ents.items():
         if value == 'B-LOC':
@@ -32,17 +31,18 @@ def extract_time_location(tokens, tokens_verb_noun,ents):
         day = 0
     return location , day , hour
 
-def get_weather(city_name, day , hour):
+def get_weather(location, day , hour):
     api_key = "acc2137340c0aeb19d563cf85cf78595"
-    api_url = "https://api.openweathermap.org/data/2.5/forecast?q={}&appid={}&units=metric&lang=ar".format(city_name, api_key)
+    if type(location) == str:
+        api_url = "https://api.openweathermap.org/data/2.5/forecast?q={}&appid={}&units=metric&lang=ar".format(location, api_key)
+    else: 
+        api_url = "https://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&appid={}&units=metric&lang=ar".format(location['latitude'],location['longitude'], api_key)
 
     response = requests.get(api_url)
     response_dict = response.json()
-	
     index = math.ceil((day*24 + hour) / 3)
     if index > 39:
         index = 39
-    print(index)
     weather = response_dict["list"][index]['weather'][0]["description"]
     temperature = round(response_dict["list"][index]["main"]["temp"])
 
@@ -52,9 +52,11 @@ def get_weather(city_name, day , hour):
         print('[!] HTTP {0} calling [{1}]'.format(response.status_code, api_url))
         return None
     
-def main(tokens, tokens_verb_noun,ents):
+def main(tokens, tokens_verb_noun,ents, user_location):
     for ent in ents.keys():
         if ent in tokens:
             tokens.remove(ent)
     location , day , hour = extract_time_location(tokens, tokens_verb_noun,ents)
+    if location == None:
+        location = user_location
     return get_weather(location , day , hour)

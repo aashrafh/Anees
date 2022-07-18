@@ -106,7 +106,7 @@ def get_time(tokens, task):
         "ربع" : [0, 15], "تلت" : [0, 20], "نص" : [0, 30],
         "دقايق" : [0, 3], "دقيقه" : [0, 3],
     }
-    # set specifiers -> [chech index in edits, how much to set]
+    # set specifiers -> [check index in edits, how much to set]
     time_specifiers_set = {
         "ساعه" : [1], "يوم" : [2], "شهر" : [3]
     }
@@ -133,8 +133,11 @@ def get_time(tokens, task):
                 edits[specifier[0]] = specifier[1]
                 if specifier[1] == 1 or specifier[1] == 7 and tokens_used[tokens.index(gram[0])] == 0:
                     number, _ = get_closest_number(gram[0])
-                    edits[specifier[0]] = specifier[1] * number # mode to handle weeks (7 * days)
-                    tokens_used[tokens.index(gram[0])] = 1
+                    if number > 10:
+                        edits[specifier[0]] = specifier[1] * number # mode to handle weeks (7 * days)
+                        tokens_used[tokens.index(gram[0])] = 1
+                    else:
+                        edits[specifier[0]] = 0
 
                 elif specifier[1] >= 3 and specifier[1] <= 9 and tokens_used[tokens.index(gram[0])] == 0: # ايام شهور اسابيع ساعات
                     number, _ = get_closest_number(gram[0])
@@ -173,6 +176,7 @@ def get_time(tokens, task):
 
     if edits[1] >= 12:
         edits[1] = 11
+    print(edits)
     return edits, tokens_used
 # need to add "الا ربع" "الا تلت" 
 # 1 minor issue the code cannot differentiate between (2, الاتنين) (3, التلات) and so on
