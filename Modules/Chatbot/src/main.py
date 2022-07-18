@@ -31,8 +31,8 @@ def get_models():
         return stopwords
 
     def get_ner_instance():
-        with open("../utils/ner_instance", 'rb') as in_strm:
-            ner_instance = dill.load(in_strm)
+        filename = f'../utils/ner_instance'
+        ner_instance = pickle.load(open(filename, 'rb'))
         return ner_instance
 
     def verb_dictionary():

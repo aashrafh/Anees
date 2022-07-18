@@ -143,7 +143,7 @@ def get_most_frequent_emotion():
         location = {'longitude':locations[0]['longitude'], 'latitude':locations[0]['latitude']}
         response = locations_recommendation(
             user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n", location)
-
+    add_conversation(user, response['text'], 0, intent)
     return {'response': response, 'intent': intent}
 
 @app.route('/update_movie_rating', methods=['PUT'])
@@ -226,7 +226,7 @@ def add_conversation(user, message, id, intent, removeFirst = 0):
     messages = user['messages']
     if removeFirst:
         messages.pop(0)
-    messageDB = {'isUser':id, 'message': message, 'time': datetime.now(), 'isGeneral' : (1 if intent == "general" else 0)}
+    messageDB = {'isUser':id, 'message': message, 'time': datetime.now(), 'isGeneral' : (1 if intent == "general" else 0), 'intent' : intent}
     messages.insert(0, messageDB)
     usersCollection.update_one({'username': username}, {
                                '$set': {'messages': messages}})
