@@ -176,7 +176,6 @@ def get_time(tokens, task):
 
     if edits[1] >= 12:
         edits[1] = 11
-    print(edits)
     return edits, tokens_used
 # need to add "الا ربع" "الا تلت" 
 # 1 minor issue the code cannot differentiate between (2, الاتنين) (3, التلات) and so on
