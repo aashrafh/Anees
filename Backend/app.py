@@ -1,5 +1,5 @@
 from urllib import request
-from flask import Flask, request, abort, jsonify
+from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 import warnings
@@ -8,7 +8,6 @@ import os
 import requests
 from datetime import datetime
 import numpy as np
-import pandas as pd
 warnings.filterwarnings("ignore")
 
 module_path = os.path.abspath(os.path.join(
@@ -20,6 +19,7 @@ CORS(app)
 app.config['MONGO_URI'] = "mongodb://localhost:27017/Anees"
 mongo = PyMongo(app)
 usersCollection = mongo.db.users
+
 
 print("importing the main....")
 import main
@@ -141,7 +141,6 @@ def get_most_frequent_emotion():
         intent = "recommendation-places"
         locations = user['locations']
         location = {'longitude':locations[0]['longitude'], 'latitude':locations[0]['latitude']}
-        print(location)
         response = locations_recommendation(
             user, "عايز اروح مكان هادى", "من محادثاتك الاخيرة معايا حسيت انك متدايق\n", location)
 

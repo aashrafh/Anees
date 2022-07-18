@@ -1,52 +1,38 @@
-import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
 from sklearn.svm import LinearSVC
+import pandas as pd
 # from count_vectorizer import CountVectorizer
 
 class NER:
     def __init__(self):
         path = "../Data/ANERCorp_CamelLab_train.txt"
         self.train_dataframe = NER.textfile_to_dataframe(file=open(path, encoding='utf-8'))
-        print(1)
         self.train()
 
     def train(self):
-        df = self.train_dataframe
-
-        train = df
-        
-        train_arr = []
-        train_lbl = []
-        print(2)
-        train_arr=train['text'].astype(str)
-        train_lbl=train['label'].astype(str)
+        words = self.train_dataframe['text'].astype(str)
+        labels = self.train_dataframe['label'].astype(str)
 
         vectorizer = CountVectorizer()
-        print(3)
-        vectorizer.fit(train_arr)
-        print(4)
-        train_mat = vectorizer.transform(train_arr)
-        print(5)
+        tf_idf = TfidfTransformer()
+        linear_svc_model = LinearSVC()
+        
+        vectorizer.fit(words)
+        vectorizer_matrix = vectorizer.transform(words)
 
-        tfidf = TfidfTransformer()
-        tfidf.fit(train_mat)
-        train_tfmat = tfidf.transform(train_mat)
+        tf_idf.fit(vectorizer_matrix)
+        tf_idf_matrix = tf_idf.transform(vectorizer_matrix)
 
-        print(6)
-
-        lsvm=LinearSVC()
-        lsvm.fit(train_tfmat,train_lbl)
-
-        print(7)
+        linear_svc_model.fit(tf_idf_matrix, labels)
 
         self.vectorizer = vectorizer
-        self.predictor = lsvm
-        self.tfidf = tfidf
+        self.predictor = linear_svc_model
+        self.tf_idf = tf_idf
         
     def predict(self, word):
         test_str = self.vectorizer.transform([word])
-        test_tfstr = self.tfidf.transform(test_str)
+        test_tfstr = self.tf_idf.transform(test_str)
         return self.predictor.predict(test_tfstr.toarray())[0]
 
     def textfile_to_dataframe(file, col1="text", col2="label"):
@@ -68,13 +54,6 @@ class NER:
         return  csv_file
 
 def get_ents(tokens,ner_instance):
-    # new_ner = NER()
-    # ents = dict()
-    # for token in tokens:
-    #     ent_type = new_ner.predict(token)
-    #     if ent_type != 'O':
-    #         ents[token] = ent_type
-    # return ents
     ents = dict()
     for token in tokens:
         ent_type = ner_instance.predict(token)
