@@ -1,4 +1,6 @@
 import React, { useEffect, useCallback, useState, useContext } from "react";
+import uuid from "react-native-uuid";
+
 import {
   GiftedChat,
   Bubble,
@@ -243,6 +245,7 @@ const Chat = ({ navigation }) => {
   };
 
   const handleResponse = (res) => {
+    console.log("handleResponse");
     if (res.data.intent === "recommendation-movies") {
       scheduleNotification(10, res.data.response.movies);
     }
@@ -260,7 +263,7 @@ const Chat = ({ navigation }) => {
     setMessages((previousMessages) =>
       GiftedChat.append(previousMessages, [
         {
-          _id: messages.length + 1,
+          _id: uuid.v4(),
           text: res.data.response.text,
           createdAt: new Date(),
           user: {
@@ -358,8 +361,21 @@ const Chat = ({ navigation }) => {
           username: token,
         })
         .then((res) => {
-          console.log(res);
-          handleResponse(res);
+          console.log("emotions result", res);
+          setMessages((previousMessages) =>
+            GiftedChat.append(previousMessages, [
+              {
+                _id: uuid.v4(),
+                text: res.data.response.text,
+                createdAt: new Date(),
+                user: {
+                  _id: 0,
+                  name: "أنيس",
+                  avatar: aneesAvatar,
+                },
+              },
+            ])
+          );
           setIsAneesTyping(false);
         })
         .catch((err) => {

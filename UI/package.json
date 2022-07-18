@@ -36,8 +36,10 @@
     "react-native-ratings": "^8.1.0",
     "react-native-router-flux": "^4.3.1",
     "react-native-typing-animation": "^0.1.7",
+    "react-native-uuid": "^2.0.1",
     "react-native-web": "0.17.1",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"
