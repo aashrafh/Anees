@@ -1,5 +1,3 @@
-
-
 import argparse
 from model import *
 
@@ -46,8 +44,7 @@ def get_parser():
     parser.add_argument('--end_command', type=str, default="EOC",
                         help="The command to end the conversation.")
 
-    args = parser.parse_args()
-    return args
+    return parser
 
 
 def load_arz_model(data_dir, ckpt_dir, ckpt_name):
@@ -60,6 +57,7 @@ def load_arz_model(data_dir, ckpt_dir, ckpt_name):
     args.ckpt_name = ckpt_name
     args.encode_prefix = '[EGYPTIAN]'
     args.model_type = 'monsoon-nlp/dialect-ar-gpt-2021'
+    args.mode = 'interact'
 
     trainer = AneesTrainer(args)
     trainer.model.eval()
@@ -77,6 +75,7 @@ def load_msa_model(data_dir, ckpt_dir, ckpt_name):
     args.ckpt_dir = ckpt_dir
     args.ckpt_name = ckpt_name
     args.model_type = 'aubmindlab/aragpt2-base'
+    args.mode = 'interact'
 
     trainer = AneesTrainer(args)
     trainer.model.eval()

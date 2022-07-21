@@ -9,12 +9,12 @@ from main import load_arz_model, load_msa_model
 
 BASE_PATH = '/content/drive/MyDrive/anees'
 
-print("Loading the ARZ model...")
-arz = load_arz_model(f'{BASE_PATH}/data/chats', f'{BASE_PATH}/chats_monsoon_ckpts',
-                     'best_ckpt_epoch=2_valid_loss=4.4047')
+# print("Loading the ARZ model...")
+# arz = load_arz_model(f'{BASE_PATH}/data/chats', f'{BASE_PATH}/chats_monsoon_ckpts',
+#                      'best_ckpt_epoch=2_valid_loss=4.4047')
 
 print("Loading the MSA model...")
-msa = load_msa_model(f'{BASE_PATH}/data', f'{BASE_PATH}/translated_aragpt2_ckpts',
+msa = load_msa_model(f'../../data', f'./ckpts',
                      'best_ckpt_epoch=9_valid_loss=3.2331')
 
 print("Setting up the API...")
@@ -71,6 +71,6 @@ def msa_response(data: Data):
     }
 
 
-ngrok_tunnel = ngrok.connect(8000)
-print('Public URL:', ngrok_tunnel.public_url)
-uvicorn.run(app, port=8000, debug='true')
+# ngrok_tunnel = ngrok.connect(3000)
+# print('Public URL:', ngrok_tunnel.public_url)
+uvicorn.run(app, port=3000, debug='true', host='0.0.0.0')

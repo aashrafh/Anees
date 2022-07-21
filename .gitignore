@@ -11,3 +11,4 @@ temp_data
 models
 movie_recommender
 location_recommender
+*.ckpt
