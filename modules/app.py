@@ -18,6 +18,9 @@ app.config['MONGO_URI'] = MONGO_URI
 mongo = PyMongo(app)
 usersCollection = mongo.db.users
 
+print("loading models....")
+stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm, q_not_model, tf_idf_q_not = main.get_models()
+
 
 @app.route('/getResponse', methods=['POST'])
 def get_response():
@@ -322,7 +325,5 @@ def locations_recommendation(user, preprocessed_text, text, location):
 
 
 if __name__ == "__main__":
-    print("loading models....")
-    stopwords, ner_instance, verbs, nouns, emotions_model, emotions_tf_idf, intent_model, tokenizer, recomm_intent_model, recomm_tokenizer, location_recomm, movie_recomm, q_not_model, tf_idf_q_not = main.get_models()
     print("Running the server...")
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

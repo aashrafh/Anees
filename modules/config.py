@@ -1,4 +1,4 @@
-MONGO_URI = "mongodb://localhost:27017/Anees"
+MONGO_URI = "mongodb://mongodb/Anees"
 GENERATION_API = 'https://4f6d-35-237-130-184.ngrok.io/msa'
 WEATHER_API_KEY = "acc2137340c0aeb19d563cf85cf78595"
 MAP_API_KEY = "AIzaSyDKR0mQtI6fh1bmcaMcdkWqGv0UuoZ7_uA"

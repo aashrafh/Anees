@@ -11,3 +11,5 @@ matplotlib
 nltk
 dill
 googlemaps
+gdown
+gdrive

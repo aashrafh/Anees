@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  modules:
+    container_name: anees-modules
+    build: ./modules
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongodb
+    environment:
+      - ENV=Development
+    volumes:
+      - .:/modules
+  mongodb:
+    image: mongo
+    container_name: aneesdb
+    ports:
+      - 27018:27018
+    volumes:
+      - db-data:/data/db
+
+volumes:
+  db-data:
