@@ -12,3 +12,4 @@ models
 movie_recommender
 location_recommender
 *.ckpt
+keys.txt
