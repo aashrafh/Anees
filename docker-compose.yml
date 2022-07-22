@@ -1,30 +1,47 @@
 version: "3.7"
 services:
-  # modules:
-  #   container_name: anees-modules
-  #   build: ./modules
-  #   ports:
-  #     - 5000:5000
-  #   depends_on:
-  #     - mongodb
-  #   environment:
-  #     - ENV=Development
-  #   volumes:
-  #     - .:/modules
-  # mongodb:
-  #   image: mongo
-  #   container_name: aneesdb
-  #   ports:
-  #     - 27018:27018
-  #   volumes:
-  #     - db-data:/data/db
+  modules:
+    container_name: anees-modules
+    build: ./modules
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongodb
+      - generation
+    environment:
+      - ENV=Development
+    volumes:
+      - .:/modules
+  mongodb:
+    image: mongo
+    container_name: aneesdb
+    ports:
+      - 27018:27018
+    volumes:
+      - db-data:/data/db
   generation:
     container_name: anees-generation
     build: ./modules/generation
     ports:
-      - 3000:3000
+      - 8000:8000
     volumes:
       - .:/modules/generation
+  # client:
+  #   container_name: anees-client
+  #   build: ./client/
+  #   ports:
+  #     - 19000:19000
+  #     - 19001:19001
+  #     - 19002:19002
+  #     - 19006:19006
+  #   environment:
+  #     - NODE_ENV=dev
+  #     - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+  #     - REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.18
+  #   volumes:
+  #     - ./client/:/client
+  #     - nodemodules:/client/node_modules
 
 volumes:
   db-data:
+  nodemodules: {}

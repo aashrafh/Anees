@@ -73,4 +73,4 @@ def msa_response(data: Data):
 
 # ngrok_tunnel = ngrok.connect(3000)
 # print('Public URL:', ngrok_tunnel.public_url)
-uvicorn.run(app, port=3000, debug='true', host='0.0.0.0')
+uvicorn.run(app, port=8000, debug='true', host='0.0.0.0')
