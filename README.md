@@ -35,6 +35,7 @@
 - [Architecture](#arch)
 - [Datasets](#datasets)
 - [Installation](#install)
+- [Technology](#tech)
 
 ## Demo <a name = "demo"></a>
 <div align="center">
@@ -60,3 +61,48 @@ Anees consists of 6 major modules that need to be understood before starting imp
 We used different datasets for each module that suit the purpose of the module. Some of the used datasets are [ANERcorp](https://camel.abudhabi.nyu.edu/anercorp/), [MovieLens 25M](https://grouplens.org/datasets/movielens/25m/), and [Arramooz](https://github.com/linuxscout/arramooz). You can download the used datasets from [Google Drive](https://drive.google.com/file/d/1tl2nmpfp6-V4WQmEhQSyrxGFGDm5wYbW/view?usp=sharing) and you can find the detasets used to fine-tune the GPT-2 model in the [this repository](https://github.com/aashrafh/anees-dataset).
 
 ## Installation <a name = "install"></a>
+
+To install and run the project:
+
+- For the modules, you need to install [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), and 
+    1. Build the image:
+    
+    ```py 
+    docker-compose build
+    ```
+    
+    2. Run the image:
+    
+    ```py 
+    docker-compose run
+    ```
+- For the client, you need to install [Node.js](https://nodejs.org/en/download/), [Expo](https://docs.expo.dev/get-started/installation/), and then:
+    1. Install the dependencies:
+    ```py
+    npm install
+    ```
+    
+    2. Run the client:
+    ```py
+    npm start
+    ```
+    
+    3. Choose between running the client through an emulator or directly on your phone. Also, you can build an APK version for Android using:
+    ```py
+    expo build:android -t apk
+    ```
+    or for iOS:
+    ```py
+    expo build:ios -t archive
+    ```
+ - Alos, we provided interactive notebooks for each module that you can use to train, visualize, or have an idea of the implementation details.
+ 
+ 
+ ## ⛏️ Built Using <a name = "tech"></a>
+- [Python](https://www.python.org/)
+- [PyTorch](https://pytorch.org/)
+- [scikit-learn](https://scikit-learn.org/stable/)
+- [MongoDB](https://www.mongodb.com/)
+- [Flask](https://flask.palletsprojects.com/en/2.1.x/)
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/)
