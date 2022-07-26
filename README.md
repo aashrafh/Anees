@@ -28,7 +28,7 @@
 ---
 
 # Anees
-**Anees** is an Arabic chatbot that can speak to users in different topics or an open-domain multi-turn conversation rather than a specific domain. Anees is your personal AI friend that you can express and witness yourself through a helpful and empathetic conversation.
+**Anees** is an Arabic chatbot that can speak to users on different topics or an open-domain multi-turn conversation rather than a specific domain. Anees is your personal AI friend that you can express and witness yourself through a helpful and empathetic conversation.
 
 ## 📝 Table of Contents
 - [Demo](#demo)
