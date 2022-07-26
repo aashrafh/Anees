@@ -97,6 +97,7 @@ To install and run the project:
     ```
  - Alos, we provided interactive notebooks for each module that you can use to train, visualize, or have an idea of the implementation details.
  
+ > Remember to update [`config.py`](https://github.com/aashrafh/Anees/blob/main/modules/config.py) with your [OpenWeatherMap](https://openweathermap.org/) API keys.
  
  ## ⛏️ Built Using <a name = "tech"></a>
 - [Python](https://www.python.org/)
