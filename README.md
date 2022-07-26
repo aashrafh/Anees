@@ -48,7 +48,7 @@ Demo 1 | Demo 2
 
 ## Architecture <a name = "arch"></a>
 
-Anees consists of 6 major modules that need to be understood before starting implementing such a thing. The modules are natural language understanding, emotion classification, intent classification, weather/schedule, recommendation, and natural language generation. Apart from that, there is the connection between each module and the other. Each of these modules are described in detail in the project [documentation](https://github.com/aashrafh/Anees/blob/rest/Anees%20Document.pdf), how they all connected to each other, and how they represent the system architecture.
+Anees consists of 6 major modules that need to be understood before starting implementing such a thing. The modules are natural language understanding, emotion classification, intent classification, weather/schedule, recommendation, and natural language generation. Apart from that, there is a connection between each module and the other. Each of these modules is described in detail in the project [documentation](https://github.com/aashrafh/Anees/blob/rest/Anees%20Document.pdf), how they are all connected to each other, and how they represent the system architecture.
 
 <div align="center">
 
