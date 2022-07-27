@@ -1,2 +1,21 @@
 ## References
 We have relied on many papers, articles, tutorials, and other resources to understand the natural language processing problem in general and the generation problem in particular. Listed below are some of the most helpful resources we used.
+
+- [Austin Huang, Suraj Subramanian, Jonathan Sum, Khalid Almubarak, and Stella Biderman. (2022). The Annotated Transformer. Harvard NLP.](http://nlp.seas.harvard.edu/annotated-transformer/)
+- [Stephen Roller, Emily Dinan, Naman Goyal, Da Ju, Mary Williamson, Yinhan Liu, Jing Xu, Myle Ott, Kurt Shuster, Eric M. Smith, Y-Lan Boureau, and Jason Weston. (2021). Recipes for Building an Open-Domain Chatbot. Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics.](https://aclanthology.org/2021.eacl-main.24.pdf)
+- [Mohaned Mashaly. (2021). Arabic based chatbot that simulates the working responsibilities of a psychiatrist.](https://github.com/12mohaned/chatbot)
+- [Haoyu Song, Yan Wang, Kaiyan Zhang, Wei-Nan Zhang, and Ting Liu. 2021. BoB: BERT Over BERT for Training Persona-based Dialogue Models from Limited Personalized Data. In Proceedings of the 59th Annual Meeting of the Association for Computational Linguistics and the 11th International Joint Conference on Natural Language Processing (Volume 1: Long Papers), pages 167–177, Online. Association for Computational Linguistics.](https://aclanthology.org/2021.acl-long.14/)
+- [Ahmed Soror, Islam Mesabah, Abdelrahman Elbeltagy, and Islam Omar. (2021). Emotional Chatbot.](https://github.com/AhmedSoror/Emotional_Chatbot)
+- [Yang JianXin. (2021). GPT2 for Chinese chitchat.](https://github.com/yangjianxin1/GPT2-chitchat)
+- [Antoun, Wissam  and Baly, Fady  and Hajj, Hazem. (2021). AraGPT2: Pre-Trained Transformer for Arabic Language Generation. Association for Computational Linguistics.](https://www.aclweb.org/anthology/2021.wanlp-1.21)
+- [Yubo Xie, Ekaterina Svikhnushina, and Pearl Pu. (2020). A Multi-Turn Emotionally Engaging Dialog Model. arXiv preprint arXiv:1908.07816v3.](https://arxiv.org/pdf/1908.07816.pdf)
+- [Li, Qintong and Chen, Hongshen and Ren, Zhaochun and Ren, Pengjie and Tu, Zhaopeng and Chen, Zhumin. (2020). EmpDG: Multi-resolution Interactive Empathetic Dialogue Generation. Proceedings of the 28th International Conference on Computational Linguistics.](http://128.84.4.27/pdf/1911.08698)
+- [Jaewoo Song. (2020). GPT-2 chatbot with multi-turn generation settings.](https://songstudio.info/tech/tech-35/)
+- [Jay Alammar. (2019). The Illustrated GPT-2 (Visualizing Transformer Language Models).](https://jalammar.github.io/illustrated-gpt2/)
+- [Omar Essam. 2018. Building a Seq2Seq Conversational Chat bot using Tensorflow.](https://omarito.me/building-a-seq2seq-conversational-chat-bot-using-tensorflow/?fbclid=IwAR0JSkJuUC39T5kmahkq5Lj_E37e-rjXX5W8QEjzT3bOEcgGMzjbQk7vHHM)
+- [Abdallah M. Bashir, Abubakr Hassan, Benjamin Rosman, Daniel Duma, and Mohanad Ahmeda. (2018).  Implementation of A Neural Natural Language Understanding Component for Arabic Dialogue Systems. Procedia Computer Science.](https://www.sciencedirect.com/science/article/pii/S1877050918321835)
+- [Jay Alammar. (2018). The Illustrated Transformer.](https://jalammar.github.io/illustrated-transformer/)
+- [Jay Alammar. (2018). Visualizing A Neural Machine Translation Model (Mechanics of Seq2seq Models With Attention).](https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/)
+- [Abdelrahman Radwan. (2017). Deep Q&A.](https://github.com/AbdelrahmanRadwan/Open-Domain-ChatBot)
+- [ARBML. Masader: Arabic NLP data catalogue.](https://arbml.github.io/masader/)
+- [CAMeL Lab: Computational Approaches to Modeling Language Lab](https://nyuad.nyu.edu/en/research/faculty-labs-and-projects/computational-approaches-to-modeling-language-lab/resources.html)
