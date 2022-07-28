@@ -58,7 +58,7 @@ Anees consists of 6 major modules that need to be understood before starting imp
 
 ## Datasets <a name = "datasets"></a>
 
-We used different datasets for each module that suit the purpose of the module. Some of the used datasets are [ANERcorp](https://camel.abudhabi.nyu.edu/anercorp/), [MovieLens 25M](https://grouplens.org/datasets/movielens/25m/), and [Arramooz](https://github.com/linuxscout/arramooz). You can download the used datasets from [Google Drive](https://drive.google.com/file/d/1tl2nmpfp6-V4WQmEhQSyrxGFGDm5wYbW/view?usp=sharing) and you can find the detasets used to fine-tune the GPT-2 model in the [this repository](https://github.com/aashrafh/anees-dataset).
+We used different datasets for each module that suit the purpose of the module. Some of the used datasets are [ANERcorp](https://camel.abudhabi.nyu.edu/anercorp/), [MovieLens 25M](https://grouplens.org/datasets/movielens/25m/), and [Arramooz](https://github.com/linuxscout/arramooz). You can download the used datasets from [Google Drive](https://drive.google.com/file/d/1tl2nmpfp6-V4WQmEhQSyrxGFGDm5wYbW/view?usp=sharing) and you can find the detasets used to fine-tune the GPT-2 model in [this repository](https://github.com/aashrafh/anees-dataset).
 
 ## Installation <a name = "install"></a>
 
