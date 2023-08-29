@@ -48,7 +48,7 @@ Demo 1 | Demo 2
 
 ## Architecture <a name = "arch"></a>
 
-Anees consists of 6 major modules that need to be understood before starting implementing such a thing. The modules are natural language understanding, emotion classification, intent classification, weather/schedule, recommendation, and natural language generation. Apart from that, there is a connection between each module and the other. Each of these modules is described in detail in the project [documentation](https://github.com/aashrafh/Anees/blob/rest/Anees%20Document.pdf), how they are all connected to each other, and how they represent the system architecture.
+Anees consists of 6 major modules that need to be understood before implementing such a thing. The modules are natural language understanding, emotion classification, intent classification, weather/schedule, recommendation, and natural language generation. Apart from that, there is a connection between each module and the other. Each of these modules is described in detail in the project [documentation](https://github.com/aashrafh/Anees/blob/rest/Anees%20Document.pdf), how they are all connected to each other, and how they represent the system architecture.
 
 <div align="center">
 
@@ -58,7 +58,7 @@ Anees consists of 6 major modules that need to be understood before starting imp
 
 ## Datasets <a name = "datasets"></a>
 
-We used different datasets for each module that suit the purpose of the module. Some of the used datasets are [ANERcorp](https://camel.abudhabi.nyu.edu/anercorp/), [MovieLens 25M](https://grouplens.org/datasets/movielens/25m/), and [Arramooz](https://github.com/linuxscout/arramooz). You can download the used datasets from [Google Drive](https://drive.google.com/file/d/1tl2nmpfp6-V4WQmEhQSyrxGFGDm5wYbW/view?usp=sharing) and you can find the detasets used to fine-tune the GPT-2 model in [this repository](https://github.com/aashrafh/anees-dataset).
+We used different datasets for each module that suit the purpose of the module. Some of the used datasets are [ANERcorp](https://camel.abudhabi.nyu.edu/anercorp/), [MovieLens 25M](https://grouplens.org/datasets/movielens/25m/), and [Arramooz](https://github.com/linuxscout/arramooz). You can find the datasets used to fine-tune the GPT-2 model in [this repository](https://github.com/aashrafh/anees-dataset).
 
 ## Installation <a name = "install"></a>
 
@@ -122,4 +122,4 @@ To install and run the project:
   
 ## Acknowledgment
 
-This project is our graduation project for Bachelor of Science degree in Computer Engineering from Cairo University, in 2022.
+This is our graduation project for a Bachelor of Science degree in Computer Engineering from Cairo University, in 2022.
